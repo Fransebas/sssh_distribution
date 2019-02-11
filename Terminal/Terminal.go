@@ -1,6 +1,7 @@
 package Terminal
 
 import (
+	"fmt"
 	"github.com/kr/pty"
 	"golang.org/x/crypto/ssh/terminal"
 	"io"
@@ -8,10 +9,11 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"rgui/Sockets"
 	"syscall"
 )
 
-func InitTerminal(r *os.File, w *os.File) error {
+func InitTerminal(srw Sockets.SocketReadWriter) error {
 	// Create arbitrary command.
 	c := exec.Command("bash", "-l")
 
@@ -28,7 +30,7 @@ func InitTerminal(r *os.File, w *os.File) error {
 	signal.Notify(ch, syscall.SIGWINCH)
 	go func() {
 		for range ch {
-			if err := pty.InheritSize(r, ptmx); err != nil {
+			if err := pty.InheritSize(os.Stdin, ptmx); err != nil {
 				log.Printf("error resizing pty: %s", err)
 			}
 		}
@@ -36,15 +38,16 @@ func InitTerminal(r *os.File, w *os.File) error {
 	ch <- syscall.SIGWINCH // Initial resize.
 
 	// Set stdin in raw mode.
-	oldState, err := terminal.MakeRaw(int(r.Fd()))
+	oldState, err := terminal.MakeRaw(int(os.Stdin.Fd()))
 	if err != nil {
 		panic(err)
 	}
-	defer func() { _ = terminal.Restore(int(r.Fd()), oldState) }() // Best effort.
+	defer func() { _ = terminal.Restore(int(os.Stdin.Fd()), oldState) }() // Best effort.
 
 	// Copy stdin to the pty and the pty to stdout.
-	go func() { _, _ = io.Copy(w, ptmx) }()
-	go func() { _, _ = io.Copy(ptmx, r) }()
+	_, _ = io.Copy(srw, ptmx)
+	fmt.Println("yea")
+	go func() { _, _ = io.Copy(ptmx, srw) }()
 
 	return nil
 }

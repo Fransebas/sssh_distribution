@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"rgui/CustomUtils"
+	"rgui/Sockets"
 	"rgui/Terminal"
 )
 
@@ -58,24 +59,26 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// conn.Re
-	rf, wf, err := os.Pipe()
-	err = Terminal.InitTerminal(rf, wf)
+	srw := Sockets.SocketReadWriter{
+		Socket: conn,
+	}
+	err = Terminal.InitTerminal(srw)
 	CustomUtils.CheckPanic(err, "unable to open terminal")
 
-	for {
-		_, p, err := conn.ReadMessage()
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		_, _ = wf.Write(p)
-		bOuput := []byte{}
-		_, _ = rf.Read(bOuput)
-		if err := conn.WriteMessage(websocket.TextMessage, bOuput); err != nil {
-			log.Println(err)
-			return
-		}
-	}
+	//for {
+	//	_, p, err := conn.ReadMessage()
+	//	if err != nil {
+	//		log.Println(err)
+	//		return
+	//	}
+	//	_, _ = wf.Write(p)
+	//	bOuput := []byte{}
+	//	_, _ = rf.Read(bOuput)
+	//	if err := conn.WriteMessage(websocket.TextMessage, bOuput); err != nil {
+	//		log.Println(err)
+	//		return
+	//	}
+	//}
 
 }
 
