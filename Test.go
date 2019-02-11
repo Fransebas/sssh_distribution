@@ -100,7 +100,7 @@ func internalError(ws *websocket.Conn, msg string, err error) {
 
 // var upgrader = websocket.Upgrader{}
 
-func serveWs(w http.ResponseWriter, r *http.Request) {
+func serveWs2(w http.ResponseWriter, r *http.Request) {
 	upgrader.CheckOrigin = nil
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {

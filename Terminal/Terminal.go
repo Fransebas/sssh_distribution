@@ -8,11 +8,10 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
-	"rgui/Sockets"
 	"syscall"
 )
 
-func InitTerminal(socket Sockets.SocketReadWriter) error {
+func InitTerminal(r *os.File, w *os.File) error {
 	// Create arbitrary command.
 	c := exec.Command("bash", "-l")
 
@@ -29,7 +28,7 @@ func InitTerminal(socket Sockets.SocketReadWriter) error {
 	signal.Notify(ch, syscall.SIGWINCH)
 	go func() {
 		for range ch {
-			if err := pty.InheritSize(os.Stdin, ptmx); err != nil {
+			if err := pty.InheritSize(r, ptmx); err != nil {
 				log.Printf("error resizing pty: %s", err)
 			}
 		}
@@ -37,15 +36,15 @@ func InitTerminal(socket Sockets.SocketReadWriter) error {
 	ch <- syscall.SIGWINCH // Initial resize.
 
 	// Set stdin in raw mode.
-	oldState, err := terminal.MakeRaw(int(os.Stdin.Fd()))
+	oldState, err := terminal.MakeRaw(int(r.Fd()))
 	if err != nil {
 		panic(err)
 	}
-	defer func() { _ = terminal.Restore(int(os.Stdin.Fd()), oldState) }() // Best effort.
+	defer func() { _ = terminal.Restore(int(r.Fd()), oldState) }() // Best effort.
 
 	// Copy stdin to the pty and the pty to stdout.
-	go func() { _, _ = io.Copy(os.Stdin, ptmx) }()
-	_, _ = io.Copy(socket, ptmx)
+	go func() { _, _ = io.Copy(w, ptmx) }()
+	go func() { _, _ = io.Copy(ptmx, r) }()
 
 	return nil
 }
