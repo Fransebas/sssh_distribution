@@ -53,3 +53,27 @@ func (srw *SocketIOWriter) Write(p []byte) (n int, err error) {
 //	}
 //	return len(b), err
 //}
+
+type GnrSocketIOWriter struct {
+	Socket            Connection
+	SocketBufferMutex *sync.Mutex
+	event             string
+}
+
+func NewSGnrSocketIOWriter(Socket Connection, event string) *GnrSocketIOWriter {
+	sw := GnrSocketIOWriter{
+		SocketBufferMutex: new(sync.Mutex),
+		Socket:            Socket,
+		event:             event,
+	}
+	return &sw
+}
+
+func (srw *GnrSocketIOWriter) Write(p []byte) (n int, err error) {
+	fmt.Printf("Output = %s \n", string(p))
+	//srw.SocketBufferMutex.Lock()
+	//defer srw.SocketBufferMutex.Unlock()
+	//defer fmt.Println("UNLOCKED")
+	srw.Socket.Emit(srw.event, string(p))
+	return len(p), err
+}

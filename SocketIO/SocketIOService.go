@@ -2,11 +2,9 @@ package SocketIO
 
 import (
 	"fmt"
-	"github.com/googollee/go-socket.io"
 	"github.com/graarh/golang-socketio"
 	"github.com/graarh/golang-socketio/transport"
 	"net/http"
-	"rgui/CustomUtils"
 	"rgui/Terminal"
 )
 
@@ -16,12 +14,12 @@ underlying types use pointers to data
 */
 type Session struct {
 	ID         string
-	SocketConn *Connection
+	SocketConn Connection
 	Terminal   Terminal.Terminal
 }
 
 type SocketIOService struct {
-	Server   *gosocketio.Server
+	Server   SocketServer
 	Sessions map[string]*Session
 }
 
@@ -31,25 +29,20 @@ type SocketIOService struct {
 
 func Constructor() (s SocketIOService) {
 
-	server := gosocketio.NewServer(transport.GetDefaultWebsocketTransport())
-
+	server := NewGraarhSocketServer(gosocketio.NewServer(transport.GetDefaultWebsocketTransport()))
 	s.Server = server
 	s.Sessions = make(map[string]*Session)
 
-	server.On(gosocketio.OnConnection, func(socket *gosocketio.Channel) {
-		fmt.Println("connected:", socket.Id())
-		if _, ok := s.Sessions[socket.Id()]; !ok {
+	server.On(gosocketio.OnConnection, func(socket Connection, msg string) {
+		fmt.Println("connected:", socket)
+		if _, ok := s.Sessions[socket.ID()]; !ok {
 			session := newSession(socket)
-			s.Sessions[socket.Id()] = session
+			s.Sessions[socket.ID()] = session
 		} else {
 			fmt.Println("Connection already exist")
 		}
-		return nil
 	})
-	server.OnError("/", func(e error) {
-		fmt.Println("meet error:", e)
-	})
-	server.OnDisconnect("/", func(s socketio.Conn, msg string) {
+	server.OnDisconnect(func(s Connection, msg string) {
 		fmt.Println("closed", msg)
 	})
 	s.InitEvents()
@@ -78,9 +71,9 @@ func (s *SocketIOService) SocketIOFix(w http.ResponseWriter, r *http.Request) {
 	//w
 }
 
-func newSession(socket *Connection) (s *Session) {
+func newSession(socket Connection) (s *Session) {
 	s = new(Session)
-	s.ID = (*socket).ID()
+	s.ID = socket.ID()
 	s.SocketConn = socket
 	s.InitTerminal()
 	return s
@@ -89,7 +82,7 @@ func newSession(socket *Connection) (s *Session) {
 func (s *Session) InitTerminal() {
 	s.Terminal = *Terminal.InitTerminal()
 	s.Terminal.Run()
-	socketWriter := NewSocketReadWriter(s.SocketConn, "terminal")
+	socketWriter := NewSGnrSocketIOWriter(s.SocketConn, "terminal")
 	s.Terminal.ContinuousRead(socketWriter)
 }
 
@@ -98,12 +91,13 @@ func (s *Session) InitCommand() {
 }
 
 func (s *SocketIOService) InitEvents() {
-	_ = s.Server.On("terminal", func(conn *gosocketio.Channel, msg string) {
+	s.Server.On("terminal", func(socket Connection, msg string) {
 		fmt.Println("data: " + msg)
-		s.Sessions[conn.ID()].Terminal.Write([]byte(msg))
+		s.Sessions[socket.ID()].Terminal.Write([]byte(msg))
 	})
 
-	_ = s.Server.On("command", func(conn *gosocketio.Channel, msg string) {
+	s.Server.On("command", func(socket Connection, msg string) {
 		// session := s.Sessions[conn.ID()]
+		fmt.Println("command data: " + msg)
 	})
 }
