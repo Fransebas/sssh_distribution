@@ -7,19 +7,14 @@ package main
 import (
 	"bufio"
 	"flag"
+	"github.com/googollee/go-socket.io"
+	"github.com/gorilla/websocket"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"os/exec"
 	"time"
-
-	"github.com/gorilla/websocket"
-)
-
-var (
-	addr    = flag.String("addr", "127.0.0.1:8080", "http service address")
-	cmdPath string
 )
 
 const (
@@ -39,6 +34,11 @@ const (
 	closeGracePeriod = 10 * time.Second
 )
 
+var (
+	addr    = flag.String("addr", "127.0.0.1:8080", "http service address")
+	cmdPath string
+)
+
 func pumpStdin(ws *websocket.Conn, w io.Writer) {
 	defer ws.Close()
 	ws.SetReadLimit(maxMessageSize)
@@ -49,7 +49,7 @@ func pumpStdin(ws *websocket.Conn, w io.Writer) {
 		if err != nil {
 			break
 		}
-		message = append(message, '\n')
+		message = append(message)
 		if _, err := w.Write(message); err != nil {
 			break
 		}
@@ -76,6 +76,74 @@ func pumpStdout(ws *websocket.Conn, r io.Reader, done chan struct{}) {
 	ws.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 	time.Sleep(closeGracePeriod)
 	ws.Close()
+}
+
+func serveWs2(w http.ResponseWriter, r *http.Request) {
+	upgrader.CheckOrigin = func(r *http.Request) bool {
+		return true
+	}
+	ws, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println("upgrade:", err)
+		return
+	}
+
+	defer ws.Close()
+
+	outr, outw, err := os.Pipe()
+	if err != nil {
+		internalError(ws, "stdout:", err)
+		return
+	}
+	defer outr.Close()
+	defer outw.Close()
+
+	inr, inw, err := os.Pipe()
+	if err != nil {
+		internalError(ws, "stdin:", err)
+		return
+	}
+	defer inr.Close()
+	defer inw.Close()
+
+	proc, err := os.StartProcess(cmdPath, flag.Args(), &os.ProcAttr{
+		Files: []*os.File{inr, outw, outw},
+	})
+	if err != nil {
+		internalError(ws, "start:", err)
+		return
+	}
+
+	inr.Close()
+	outw.Close()
+
+	stdoutDone := make(chan struct{})
+	go pumpStdout(ws, outr, stdoutDone)
+	go ping(ws, stdoutDone)
+
+	pumpStdin(ws, inw)
+
+	// Some commands will exit when stdin is closed.
+	inw.Close()
+
+	// Other commands need a bonk on the head.
+	if err := proc.Signal(os.Interrupt); err != nil {
+		log.Println("inter:", err)
+	}
+
+	select {
+	case <-stdoutDone:
+	case <-time.After(time.Second):
+		// A bigger bonk on the head.
+		if err := proc.Signal(os.Kill); err != nil {
+			log.Println("term:", err)
+		}
+		<-stdoutDone
+	}
+
+	if _, err := proc.Wait(); err != nil {
+		log.Println("wait:", err)
+	}
 }
 
 func ping(ws *websocket.Conn, done chan struct{}) {

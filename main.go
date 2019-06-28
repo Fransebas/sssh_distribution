@@ -2,13 +2,15 @@ package main
 
 import (
 	"fmt"
-	"github.com/googollee/go-socket.io"
 	"github.com/gorilla/websocket"
+	"github.com/rs/cors"
+	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"rgui/CustomUtils"
-	"rgui/Sockets"
+	"rgui/Services/CommandExecuter"
+	"rgui/Services/RecentCommands"
+	"rgui/SocketIO"
 	"rgui/Terminal"
 )
 
@@ -16,36 +18,15 @@ const (
 	port = ":2000"
 )
 
-type CorseMiddleware struct {
-}
-
-func (CorseMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
-	//Allow CORS here By * or specific origin
-	w.Header().Set("Access-Control-Allow-Origin", r.Header["Origin"][0])
-	w.Header().Set("Access-Control-Allow-Headers", "x-requested-with, Content-Type, origin, authorization, accept")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PUT, PATCH")
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	// return "OKOK"
-	server.ServeHTTP(w, r)
-
-}
-
-var server *socketio.Server
-var middleWare CorseMiddleware
 var upgrader = websocket.Upgrader{}
+var recentCommandsSrvc RecentCommands.RecentCommands
+var commandExecuter CommandExecuter.CommandExecuter
 
-func setUpSocket(so *socketio.Socket) {
-	err := (*so).On("data", func(msg string) {
-		fmt.Println(msg)
-		_, err := os.Stdout.Write([]byte(msg))
-		//_, err := os.Stdin.Write()
-		CustomUtils.CheckPrint(err)
-	})
-	CustomUtils.CheckPrint(err)
-	// srw := Sockets.CreateSocketReadWriter(so, "data", "data")
-	// err = Terminal.InitTerminal(srw)
-	CustomUtils.CheckPanic(err, ": panic initializing the terminal")
+var terminal *Terminal.Terminal
+
+func init() {
+	//recentCommandsSrvc.Socket = Sockets.NewSocketReadWriter()
+
 }
 
 func serveWs(w http.ResponseWriter, r *http.Request) {
@@ -53,53 +34,67 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 		return true
 	}
 	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println(err)
-		return
-	}
+	CustomUtils.CheckPrint(err)
 
-	// conn.Re
-	srw := Sockets.SocketReadWriter{
-		Socket: conn,
-	}
-	err = Terminal.InitTerminal(srw)
+	recentCommandsSrvc.Socket.SetSocket(conn)
+
+	// terminal = Terminal.InitTerminal(*recentCommandsSrvc.Socket, false)
+
 	CustomUtils.CheckPanic(err, "unable to open terminal")
 
-	//for {
-	//	_, p, err := conn.ReadMessage()
-	//	if err != nil {
-	//		log.Println(err)
-	//		return
-	//	}
-	//	_, _ = wf.Write(p)
-	//	bOuput := []byte{}
-	//	_, _ = rf.Read(bOuput)
-	//	if err := conn.WriteMessage(websocket.TextMessage, bOuput); err != nil {
-	//		log.Println(err)
-	//		return
-	//	}
-	//}
+	go func() { terminal.Run() }()
+}
+
+func serveCmdSocket(w http.ResponseWriter, r *http.Request) {
+	upgrader.CheckOrigin = func(r *http.Request) bool {
+		return true
+	}
+	conn, err := upgrader.Upgrade(w, r, nil)
+	CustomUtils.CheckPrint(err)
+	recentCommandsSrvc.Socket.Socket = conn
+}
+
+func newCommand(w http.ResponseWriter, r *http.Request) {
+	// todo: add security
+	b, err := ioutil.ReadAll(r.Body)
+
+	_, _ = fmt.Fprintln(w, "ok")
+	flusher, _ := w.(http.Flusher)
+	flusher.Flush()
+
+	CustomUtils.CheckPrint(err)
+	// fmt.Println("Command\n" + string(b))
+	recentCommandsSrvc.UpdateRecentCommands(string(b))
 
 }
 
+func execCommand(w http.ResponseWriter, r *http.Request) {
+	// todo: add security
+	b, err := ioutil.ReadAll(r.Body)
+
+	CustomUtils.CheckPrint(err)
+	//fmt.Println("exec command: " + string(b))
+	_, _ = fmt.Fprintln(w, commandExecuter.ExecuteCommand(string(b)))
+
+	flusher, _ := w.(http.Flusher)
+	flusher.Flush()
+}
+
 func main() {
-	//var err error
-	//server, err = socketio.NewServer(nil)
+	//r := mux.NewRouter()
+	mux := http.NewServeMux()
 
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//
-	//_ = server.On("connection", func(so socketio.Socket) {
-	//	fmt.Println("connection")
-	//	setUpSocket(&so)
-	//})
-	//_ = server.On("error", func(so socketio.Socket, err error) {
-	//	log.Println("error:", err)
-	//})
-
-	http.HandleFunc("/socket", serveWs)
-	http.Handle("/", http.FileServer(http.Dir("./asset")))
-	log.Println("Serving at localhost:5000...")
-	log.Fatal(http.ListenAndServe(port, nil))
+	mux.HandleFunc("/cmdsocket", serveCmdSocket)
+	mux.HandleFunc("/socket", serveWs)
+	mux.HandleFunc("/newcommand", newCommand)
+	mux.HandleFunc("/exec", execCommand)
+	//http.Handle("/", http.FileServer(http.Dir("./asset")))
+	log.Println("Serving at localhost:2000...")
+	//http.Handle("/api", r)
+	socketService := SocketIO.Constructor()
+	// socketService.InitEvents()
+	mux.HandleFunc("/socket.io/", socketService.SocketIOFix)
+	//mux.Handle("/socket.io/", socketService.Server)
+	handler := cors.Default().Handler(mux)
+	log.Fatal(http.ListenAndServe(port, handler))
 }
