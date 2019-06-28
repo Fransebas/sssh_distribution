@@ -2,8 +2,9 @@ package SocketIO
 
 import (
 	"fmt"
-	"github.com/googollee/go-engine.io"
 	"github.com/googollee/go-socket.io"
+	"github.com/graarh/golang-socketio"
+	"github.com/graarh/golang-socketio/transport"
 	"net/http"
 	"rgui/CustomUtils"
 	"rgui/Terminal"
@@ -15,12 +16,12 @@ underlying types use pointers to data
 */
 type Session struct {
 	ID         string
-	SocketConn *socketio.Conn
+	SocketConn *Connection
 	Terminal   Terminal.Terminal
 }
 
 type SocketIOService struct {
-	Server   *socketio.Server
+	Server   *gosocketio.Server
 	Sessions map[string]*Session
 }
 
@@ -30,22 +31,16 @@ type SocketIOService struct {
 
 func Constructor() (s SocketIOService) {
 
-	opt := engineio.Options{
-		//PingInterval : time.Millisecond*100,
-		//PingTimeout : time.Minute,
-	}
+	server := gosocketio.NewServer(transport.GetDefaultWebsocketTransport())
 
-	server, e := socketio.NewServer(&opt)
 	s.Server = server
 	s.Sessions = make(map[string]*Session)
-	CustomUtils.CheckPanic(e, "Could not initiate socket io server")
 
-	server.OnConnect("/", func(socket socketio.Conn) error {
-		socket.SetContext("")
-		fmt.Println("connected:", socket.ID())
-		if _, ok := s.Sessions[socket.ID()]; !ok {
-			session := newSession(&socket)
-			s.Sessions[socket.ID()] = session
+	server.On(gosocketio.OnConnection, func(socket *gosocketio.Channel) {
+		fmt.Println("connected:", socket.Id())
+		if _, ok := s.Sessions[socket.Id()]; !ok {
+			session := newSession(socket)
+			s.Sessions[socket.Id()] = session
 		} else {
 			fmt.Println("Connection already exist")
 		}
@@ -83,7 +78,7 @@ func (s *SocketIOService) SocketIOFix(w http.ResponseWriter, r *http.Request) {
 	//w
 }
 
-func newSession(socket *socketio.Conn) (s *Session) {
+func newSession(socket *Connection) (s *Session) {
 	s = new(Session)
 	s.ID = (*socket).ID()
 	s.SocketConn = socket
@@ -103,12 +98,12 @@ func (s *Session) InitCommand() {
 }
 
 func (s *SocketIOService) InitEvents() {
-	s.Server.OnEvent("/", "terminal", func(conn socketio.Conn, msg string) {
+	_ = s.Server.On("terminal", func(conn *gosocketio.Channel, msg string) {
 		fmt.Println("data: " + msg)
 		s.Sessions[conn.ID()].Terminal.Write([]byte(msg))
 	})
 
-	s.Server.OnEvent("/", "command", func(conn socketio.Conn, msg string) {
+	_ = s.Server.On("command", func(conn *gosocketio.Channel, msg string) {
 		// session := s.Sessions[conn.ID()]
 	})
 }
