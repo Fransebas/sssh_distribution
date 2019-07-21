@@ -1,7 +1,6 @@
 package Sockets
 
 import (
-	"fmt"
 	"github.com/gorilla/websocket"
 	"sync"
 	"time"
@@ -44,7 +43,6 @@ func (srw *SocketReadWriter) async() {
 }
 
 func (srw *SocketReadWriter) AsyncWrite(p []byte) {
-	fmt.Println("message 2 : " + string(p))
 	*srw.SocketBft <- p
 }
 

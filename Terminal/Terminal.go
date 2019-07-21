@@ -10,27 +10,43 @@ import (
 	"os/exec"
 	"path/filepath"
 	"rgui/CustomUtils"
+	"rgui/Services/SSH"
+	"sync"
 )
 
 const (
 	relativePath = "Assets/bashrc.sh"
 )
 
+var FILE_NAME = "testhistory" // Constant for now, but this should change per session or user
+
 /*
 Holds all the important things that make up a terminal
 Safe for copy, all types are pointers
 */
 type Terminal struct {
-	ptmx  *os.File
-	ch    *chan os.Signal
-	state *terminal.State
+	ptmx            *os.File
+	ch              *chan os.Signal
+	state           *terminal.State
+	resizeMux       *sync.Mutex
+	user            *SSH.User
+	HistoryFilePath string
 	//srw *io.ReadWriter
 }
 
 // Constructor
-func InitTerminal() *Terminal {
+func InitTerminal(user *SSH.User) *Terminal {
 	var t Terminal
-	t.ptmx = initInteractive()
+
+	t.resizeMux = new(sync.Mutex)
+	t.user = user
+
+	// The file base path is the Assets, maybe there is a better place like /etc or something
+	basePath, err := filepath.Abs("Assets/")
+	CustomUtils.CheckPanic(err, "Could not create history file for the session")
+	t.HistoryFilePath = fmt.Sprintf("%v/%v", basePath, FILE_NAME)
+
+	t.ptmx = initInteractive(user.ID, t.HistoryFilePath)
 	return &t
 }
 
@@ -60,15 +76,6 @@ func (t *Terminal) Run() {
 	t.state, err = terminal.MakeRaw(0)
 	CustomUtils.CheckPanic(err, "Couldn't make terminal")
 
-	// initialCmds(ptmx)
-
-	//
-
-	// Handle pty size.
-	//ch := make(chan os.Signal, 1)
-	//t.ch = &ch
-	//signal.Notify(*t.ch, syscall.SIGWINCH)
-
 	var winSize pty.Winsize
 	winSize.X = 24
 	winSize.Y = 24
@@ -78,37 +85,44 @@ func (t *Terminal) Run() {
 	if err := pty.Setsize(t.ptmx, &winSize); err != nil {
 		log.Printf("error resizing pty: %s", err)
 	}
-	//go func() {
-	//	for range *t.ch {
-	//		if err := pty.InheritSize(os.Stdin, t.ptmx); err != nil {
-	//			log.Printf("error resizing pty: %s", err)
-	//		}
-	//	}
-	//}()
-	//*t.ch <- syscall.SIGWINCH // Initial resize.
+}
 
-	//reader := (*t.srw).(io.Reader)
-	//writer := (*t.srw).(io.Writer)
+func (t *Terminal) SetSizeVals(X, Y, COLS, ROWS uint16) {
+	var winSize pty.Winsize
+	winSize.X = X
+	winSize.Y = Y
+	winSize.Cols = COLS
+	winSize.Rows = ROWS
+	t.SetSize(&winSize)
+}
 
-	// Copy stdin to the pty and the pty to stdout.
-	//go func() {_, _ = io.Copy(t.ptmx, reader) }()
-	//_, _ = io.Copy(writer, t.ptmx)
+func (t *Terminal) SetSize(winSize *pty.Winsize) {
+	t.resizeMux.Lock()
+	defer t.resizeMux.Unlock()
+	if err := pty.Setsize(t.ptmx, winSize); err != nil {
+		log.Printf("error resizing pty: %s", err)
+	}
 }
 
 func (t *Terminal) Close() {
 	// Make sure to close the pty at the end.
 	// Best effort.// Set stdin in raw mode.
 	defer func() { _ = t.ptmx.Close() }()
-
 	defer func() { _ = terminal.Restore(0, t.state) }() // Best effort.
 }
 
-func initInteractive() *os.File {
+func initInteractive(ID string, historyPath string) *os.File {
 	// Handle pty size.
-	relativePath := "Assets/bashrc"
-	path, err := filepath.Abs(relativePath)
+	basePath, err := filepath.Abs("Assets/")
+	fmt.Printf("basePath = %v \n", basePath)
+	relativePath := fmt.Sprintf("%v/bashrc", basePath)
+	path := relativePath
 	fmt.Println("path " + path)
-	c := exec.Command("bash", "--rcfile", path, "-i")
+
+	// Send the initialization file the variables it's going to use
+	bash := fmt.Sprintf("export SSSH_USER=%v; export HIST_FILE_NAME=%v; bash --rcfile %s -i ", ID, historyPath, path)
+	c := exec.Command("bash", "-c", bash)
+	//c := exec.Command("bash", "--rcfile", path, "-i")
 	CustomUtils.CheckPanic(err, "Could not initialize Terminal")
 	// Start the command with a pty.
 
