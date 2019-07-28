@@ -127,11 +127,10 @@ func (s *CustomSocket) run() {
 	for s.isOpen {
 
 		mst, msg, err := s.connection.ReadMessage()
-
-		if s.isAuth {
-			// This check is only after the socket has presented the credentials to authenticate
-			msg, err = SSH.SSHDecode(msg, s.user)
-		}
+		//
+		//if s.isAuth {
+		//	// This check is only after the socket has presented the credentials to authenticate
+		//}
 
 		if err != nil || mst == -1 || mst == websocket.CloseGoingAway || mst == websocket.CloseNormalClosure {
 			_ = s.connection.Close()
@@ -178,9 +177,9 @@ func (s *CustomSocket) GetUser() *SSH.User {
 }
 
 func (s *CustomSocket) Write(event string, msg string) (e error) {
-	msgByte, err := SSH.SSHEncode([]byte(msg), s.user)
-	CustomUtils.CheckPrint(err)
-	return s.Emit(event, string(msgByte))
+	//msgByte, err := SSH.SSHEncode([]byte(msg), s.user)
+	//CustomUtils.CheckPrint(err)
+	return s.Emit(event, msg)
 }
 
 func (s *CustomSocket) On(event string, f func(msg string)) {

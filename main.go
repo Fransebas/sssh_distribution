@@ -124,6 +124,13 @@ func testDecipher(w http.ResponseWriter, r *http.Request) {
 	flusher.Flush()
 }
 
+func testConnection(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Hello")
+
+	flusher, _ := w.(http.Flusher)
+	flusher.Flush()
+}
+
 func man(w http.ResponseWriter, r *http.Request) {
 	// todo: add security
 	b, err := ioutil.ReadAll(r.Body)
@@ -144,7 +151,13 @@ func TestPrintFile(path string) {
 	fmt.Println(data)
 }
 
+func startSSHServer() {
+
+}
+
 func main() {
+	// var s ssh.Session
+
 	SSH.GenerateNewECSDAKey()
 	//r := mux.NewRouter()
 	mux := http.NewServeMux()
@@ -157,6 +170,7 @@ func main() {
 	mux.HandleFunc("/commandlist", getCommandList)
 	mux.HandleFunc("/exec", execCommand)
 	mux.HandleFunc("/man", man)
+	mux.HandleFunc("/", testConnection)
 
 	mux.HandleFunc("/encrypt", testCipher)
 	mux.HandleFunc("/decrypt", testDecipher)
