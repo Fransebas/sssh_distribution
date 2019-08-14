@@ -1,6 +1,6 @@
 #!/bin/sh
 
-git filter-branch --env-filter '
+git filter-branch -f --env-filter '
 
 OLD_EMAIL="atlas@polispay.org"
 CORRECT_NAME="Sebastian Franco"
