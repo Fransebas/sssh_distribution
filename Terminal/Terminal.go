@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/kr/pty"
 	"golang.org/x/crypto/ssh/terminal"
-	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -35,24 +34,27 @@ type Terminal struct {
 }
 
 // Constructor
-func InitTerminal(user *SSH.User) *Terminal {
+func InitTerminal(id string) *Terminal {
 	var t Terminal
 
 	t.resizeMux = new(sync.Mutex)
-	t.user = user
 
 	// The file base path is the Assets, maybe there is a better place like /etc or something
 	basePath, err := filepath.Abs("Assets/")
 	CustomUtils.CheckPanic(err, "Could not create history file for the session")
 	t.HistoryFilePath = fmt.Sprintf("%v/%v", basePath, FILE_NAME)
 
-	t.ptmx = initInteractive(user.ID, t.HistoryFilePath)
+	t.ptmx = initInteractive(id, t.HistoryFilePath)
 	return &t
 }
 
 // Write data into the terminal/bash
-func (t *Terminal) Write(b []byte) {
-	t.ptmx.Write(b)
+func (t *Terminal) Write(b []byte) (int, error) {
+	return t.ptmx.Write(b)
+}
+
+func (t *Terminal) Read(b []byte) (int, error) {
+	return t.ptmx.Read(b)
 }
 
 /*
@@ -63,9 +65,9 @@ the socket or whatever interface that comunicates with it need to implement the 
 
 Don't know if this should use the "go func" or the calling function 🤷🏼‍♂️
 */
-func (t *Terminal) ContinuousRead(writer io.Writer) {
-	go func() { _, _ = io.Copy(writer, t.ptmx) }()
-}
+//func (t *Terminal) ContinuousRead(writer io.Writer) {
+//	go func() { _, _ = io.Copy(writer, t.ptmx) }()
+//}
 
 /*
 For now this function initialize the terminal and checks continuosly if the screen change size but this doesn't work

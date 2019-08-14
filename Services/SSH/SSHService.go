@@ -38,39 +38,39 @@ func ProofClaims(key []byte) error {
 	return nil
 }
 
-func SSHDecode(msg []byte, user *User) ([]byte, error) {
-	// TODO: encryption not implemented
-	// If the decoding is not successful return an error
-	var encryptedJSON EncryptedJSON
-	key, _ := hex.DecodeString("6368616e679520746869731070617373")
-	err := json.Unmarshal(msg, &encryptedJSON)
-	CustomUtils.CheckPanic(err, "Could not unmarshal json")
-	iv, e := hex.DecodeString(encryptedJSON.Iv)
-	CustomUtils.CheckPanic(e, "Could not decode iv")
-	decodedMessage, e := hex.DecodeString(encryptedJSON.EncryptedMessage)
+//func SSHDecode(msg []byte, user *User) ([]byte, error) {
+//	// TODO: encryption not implemented
+//	// If the decoding is not successful return an error
+//	var encryptedJSON EncryptedJSON
+//	key, _ := hex.DecodeString("6368616e679520746869731070617373")
+//	err := json.Unmarshal(msg, &encryptedJSON)
+//	CustomUtils.CheckPanic(err, "Could not unmarshal json")
+//	iv, e := hex.DecodeString(encryptedJSON.Iv)
+//	CustomUtils.CheckPanic(e, "Could not decode iv")
+//	decodedMessage, e := hex.DecodeString(encryptedJSON.EncryptedMessage)
+//
+//	return decrypt(decodedMessage, key, iv)[:encryptedJSON.MessageSize], nil
+//}
 
-	return decrypt(decodedMessage, key, iv)[:encryptedJSON.MessageSize], nil
-}
-
-func decrypt(msg []byte, key []byte, iv []byte) []byte {
-	block, err := aes.NewCipher(key)
-	if err != nil {
-		panic(err)
-	}
-	//ciphertext := make([]byte, len(msg))
-	mode := cipher.NewCBCDecrypter(block, iv)
-	mode.CryptBlocks(msg, msg)
-	return msg
-}
-
-func getIV(plaintext string) []byte {
-	ciphertext := make([]byte, aes.BlockSize+len(plaintext))
-	iv := ciphertext[:aes.BlockSize]
-	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
-		panic(err)
-	}
-	return iv
-}
+//func decrypt(msg []byte, key []byte, iv []byte) []byte {
+//	block, err := aes.NewCipher(key)
+//	if err != nil {
+//		panic(err)
+//	}
+//	//ciphertext := make([]byte, len(msg))
+//	mode := cipher.NewCBCDecrypter(block, iv)
+//	mode.CryptBlocks(msg, msg)
+//	return msg
+//}
+//
+//func getIV(plaintext string) []byte {
+//	ciphertext := make([]byte, aes.BlockSize+len(plaintext))
+//	iv := ciphertext[:aes.BlockSize]
+//	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+//		panic(err)
+//	}
+//	return iv
+//}
 
 func encrypt(msg []byte, key []byte, iv []byte) []byte {
 	block, err := aes.NewCipher(key)
