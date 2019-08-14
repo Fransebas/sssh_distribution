@@ -1,0 +1,112 @@
+echo $$HIST_FILE_NAME
+echo $HIST_FILE_NAME
+history
+history -a
+cd /Users/fransebas/go/src/rgui/Assets
+clear
+ls
+bash ./getCommands 
+ls
+ls
+clear
+ls
+ls
+ls
+python3
+compgen -b
+compgen -a
+compgen -bk
+clear
+compgen -b
+clear
+compgen -A function
+cd 
+ls
+cd /Users/fransebas/go/src/rgui/Assets
+clear
+ls
+./getCommands
+chmod 777 ./getCommands
+./getCommands
+bash ./getCommands
+CLEAR
+bash ./getCommands
+python3
+python3.6
+man man
+man man
+python3
+clear
+]
+-a
+ls
+ls
+ls
+ls
+ls
+groff
+info groff
+nano a
+ls -a
+python3
+clear
+python3
+ls
+ls
+clear
+ls
+ls
+go
+cd /Users/fransebas/.node-gyp
+clear
+cd 
+clear
+clear
+ls
+ls
+clea
+clear
+ls
+ls
+ye
+cd
+clear
+ls
+cd /Users/fransebas/Library/Android/sdk
+ls
+cd tools/
+ls
+cd bin/
+ls
+cd ..
+ls
+cd ..
+ls
+cd extras
+ls
+cd ..
+ls
+ls
+ls
+clear
+ls
+ls
+ls
+ls
+ls
+ckear
+clear
+ls
+ls
+clear
+ls
+clear
+python3
+clear
+ls
+clear
+echo "hello world"
+clear
+nano ~/.ssh/authorized_keys
+nano ~/.ssh/authorized_keys
+ls

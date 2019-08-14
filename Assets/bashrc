@@ -1,0 +1,29 @@
+#history -anrw $HIST_FILE_NAME
+
+if [ ! -e "$HIST_FILE_NAME" ] ; then
+    touch "$HIST_FILE_NAME"
+fi
+
+export HISTFILE=$HIST_FILE_NAME
+echo $HISTFILE
+
+export HISTCONTROL=ignorespace ; history -d 1
+
+# curl --data "$(history)" http://localhost:2000/newcommand?SSSH_USER=$SSSH_USER &> /dev/null
+
+# This is for debugging
+# curl --data "$(history)" http://localhost:2000/newcommand?SSSH_USER=$SSSH_USER
+# export PROMPT_COMMAND='curl --data "$(history 1)" http://localhost:2000/newcommand?SSSH_USER=$SSSH_USER'
+
+
+
+echo HIST_FILE_NAME
+echo $HIST_FILE_NAME
+
+# This is for production
+curl --data "$(history)" http://localhost:2000/newcommand?SSSH_USER=$SSSH_USER &> /dev/null
+export PROMPT_COMMAND='curl --data "$(history 1)" http://localhost:2000/newcommand?SSSH_USER=$SSSH_USER &> /dev/null'
+
+~/.bashrc
+
+bash -l
