@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/rs/cors"
@@ -13,10 +14,7 @@ import (
 	"sssh_server/Services/SocketIO"
 )
 
-const (
-	httpport = ":2000"
-	sshport  = ":2000"
-)
+var port = flag.Int("port", 2000, "Select a port")
 
 var upgrader = websocket.Upgrader{}
 var commandExecuter CommandExecuter.CommandExecuter
@@ -45,6 +43,7 @@ func newCommand(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	flag.Parse()
 	// var s ssh.Session
 
 	SSH.GenerateNewECSDAKey()
@@ -54,9 +53,9 @@ func main() {
 	// needed http
 	mux.HandleFunc("/newcommand", newCommand)
 
-	log.Println("Serving at localhost:2000...")
+	log.Printf("Serving at localhost:%v...\n", (*port))
 	handler := cors.Default().Handler(mux)
 	go socketService.Serve()
 
-	log.Fatal(http.ListenAndServe(httpport, handler))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", (*port)), handler))
 }
