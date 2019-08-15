@@ -2,10 +2,10 @@ package SocketIO
 
 import (
 	"fmt"
-	"rgui/Services/CommandList"
-	"rgui/Services/RecentCommands"
-	"rgui/Services/SSH"
-	"rgui/Terminal"
+	"sssh_server/Services/CommandList"
+	"sssh_server/Services/RecentCommands"
+	"sssh_server/Services/SSH"
+	"sssh_server/Terminal"
 	"sync"
 )
 

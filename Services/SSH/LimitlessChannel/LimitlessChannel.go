@@ -11,7 +11,7 @@ package LimitlessChannel
 import (
 	"encoding/json"
 	"io"
-	"rgui/CustomUtils"
+	"sssh_server/CustomUtils"
 )
 
 // The writer most surely is a ssh.Channel but I leave it general

@@ -8,8 +8,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"rgui/CustomUtils"
-	"rgui/Services/SSH"
+	"sssh_server/CustomUtils"
+	"sssh_server/Services/SSH"
 	"sync"
 )
 

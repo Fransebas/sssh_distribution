@@ -7,10 +7,10 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"rgui/CustomUtils"
-	"rgui/Services/CommandExecuter"
-	"rgui/Services/SSH"
-	"rgui/Services/SocketIO"
+	"sssh_server/CustomUtils"
+	"sssh_server/Services/CommandExecuter"
+	"sssh_server/Services/SSH"
+	"sssh_server/Services/SocketIO"
 )
 
 const (

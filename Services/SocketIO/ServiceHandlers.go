@@ -6,11 +6,11 @@ import (
 	"github.com/kr/pty"
 	"io"
 	"io/ioutil"
-	"rgui/CustomUtils"
-	"rgui/Services/CommandExecuter"
-	"rgui/Services/CommandList"
-	"rgui/Services/RecentCommands"
-	"rgui/Services/SSH"
+	"sssh_server/CustomUtils"
+	"sssh_server/Services/CommandExecuter"
+	"sssh_server/Services/CommandList"
+	"sssh_server/Services/RecentCommands"
+	"sssh_server/Services/SSH"
 )
 
 var commandExecuter CommandExecuter.CommandExecuter

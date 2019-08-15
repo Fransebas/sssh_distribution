@@ -3,8 +3,8 @@ package RecentCommands
 import (
 	"bufio"
 	"io/ioutil"
-	"rgui/CustomUtils"
-	"rgui/Terminal"
+	"sssh_server/CustomUtils"
+	"sssh_server/Terminal"
 	"strconv"
 	"strings"
 )

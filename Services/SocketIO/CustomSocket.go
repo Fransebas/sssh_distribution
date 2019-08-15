@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"net/http"
-	"rgui/CustomUtils"
-	"rgui/Services/SSH"
+	"sssh_server/CustomUtils"
+	"sssh_server/Services/SSH"
 	"sync"
 	"time"
 )

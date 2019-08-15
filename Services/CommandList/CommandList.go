@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 	"os/exec"
 	"path/filepath"
-	"rgui/CustomUtils"
-	"rgui/Services/RecentCommands/Models"
+	"sssh_server/CustomUtils"
+	"sssh_server/Services/RecentCommands/Models"
 	"strings"
 )
 

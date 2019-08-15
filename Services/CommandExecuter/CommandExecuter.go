@@ -2,7 +2,7 @@ package CommandExecuter
 
 import (
 	"os/exec"
-	"rgui/CustomUtils"
+	"sssh_server/CustomUtils"
 )
 
 type CommandExecuter struct {
