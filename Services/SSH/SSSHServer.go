@@ -45,7 +45,8 @@ func (server *SSSHServer) ReadAuthorizedKeys(path string) {
 	server.authorizedKeysMap = map[string]bool{}
 	file, err := os.Open(path)
 	if err != nil {
-		log.Fatal(err)
+		// If no file no problem just no keys
+		return
 	}
 	defer file.Close()
 

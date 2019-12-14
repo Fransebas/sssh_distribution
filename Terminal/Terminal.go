@@ -2,7 +2,7 @@ package Terminal
 
 import (
 	"fmt"
-	"github.com/kr/pty"
+	"github.com/creack/pty"
 	"golang.org/x/crypto/ssh/terminal"
 	"log"
 	"os"
@@ -124,6 +124,7 @@ func initInteractive(ID string, historyPath string) *os.File {
 	// Send the initialization file the variables it's going to use
 	bash := fmt.Sprintf("export SSSH_USER=%v; export HIST_FILE_NAME=%v; bash --rcfile %s -i ", ID, historyPath, path)
 	c := exec.Command("bash", "-c", bash)
+
 	//c := exec.Command("bash", "--rcfile", path, "-i")
 	CustomUtils.CheckPanic(err, "Could not initialize Terminal")
 	// Start the command with a pty.

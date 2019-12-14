@@ -9,6 +9,7 @@ import (
 	"sssh_server/CustomUtils"
 	"sssh_server/Services/CommandExecuter"
 	"sssh_server/Services/CommandList"
+	"sssh_server/Services/GlobalVariables"
 	"sssh_server/Services/RecentCommands"
 	"sssh_server/Services/SSH"
 )
@@ -23,6 +24,8 @@ func (s *SocketIOService) InitHandlers() {
 	s.Server.HandleFunc("exec", s.execCommand)
 	s.Server.HandleFunc("man", s.manCommand)
 	s.Server.HandleFunc("echo", s.echoCommand)
+	s.Server.HandleFunc("globalVars", s.globalVars)
+	s.Server.HandleFunc("setVar", s.setVar)
 
 	// Connections
 	// open connections that received and send data many times
@@ -61,7 +64,20 @@ func (service *SocketIOService) manCommand(s *SSH.Session, w io.Writer, r io.Rea
 	CustomUtils.CheckPrint(err)
 	//fmt.Println("exec command: " + string(b))
 	manCmnd := fmt.Sprintf("man %s | col -b", string(b))
-	w.Write([]byte(commandExecuter.ExecuteCommand(manCmnd)))
+	_, _ = w.Write([]byte(commandExecuter.ExecuteCommand(manCmnd)))
+}
+
+// Return an array of vars with the global variables
+func (service *SocketIOService) globalVars(s *SSH.Session, w io.Writer, r io.Reader) {
+	_, _ = w.Write([]byte(service.Sessions[s.GetSessionID()].GlobalVars.GetVariables()))
+}
+
+// Set a given var
+func (service *SocketIOService) setVar(s *SSH.Session, w io.Writer, r io.Reader) {
+	b, _ := CustomUtils.Read(r)
+	var bashVar GlobalVariables.BashVar
+	_ = json.Unmarshal(b, &bashVar)
+	_ = service.Sessions[s.GetSessionID()].GlobalVars.StoreVariable(bashVar)
 }
 
 // Connections

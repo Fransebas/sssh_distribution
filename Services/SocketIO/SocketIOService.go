@@ -3,6 +3,7 @@ package SocketIO
 import (
 	"fmt"
 	"sssh_server/Services/CommandList"
+	"sssh_server/Services/GlobalVariables"
 	"sssh_server/Services/RecentCommands"
 	"sssh_server/Services/SSH"
 	"sssh_server/Terminal"
@@ -20,6 +21,7 @@ type Session struct {
 	recentCommandsMutex sync.Mutex
 	commandList         *CommandList.CommandList
 	SSHSession          *SSH.Session
+	GlobalVars          GlobalVariables.GlobalVariables
 }
 
 type SocketIOService struct {
@@ -79,6 +81,7 @@ func newSession(shhSession *SSH.Session) (s *Session) {
 	s.recentCommandsMutex.Lock()
 	s.InitTerminal()
 	s.commandList = CommandList.NewCommandList()
+	s.GlobalVars = GlobalVariables.GlobalVariables{}
 	return s
 }
 
