@@ -1,4 +1,4 @@
-package SocketIO
+package SessionLayer
 
 import (
 	"github.com/desertbit/glue"

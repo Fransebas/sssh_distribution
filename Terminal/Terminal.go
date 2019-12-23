@@ -113,6 +113,9 @@ func (t *Terminal) Close() {
 	defer func() { _ = terminal.Restore(0, t.state) }() // Best effort.
 }
 
+// Creates and interactive bash session based on the ID and the file to use as history file, here we add the file to run for the initialization,
+// i.e. we change the bashrc for our own version that by itself call the user bashrc
+// the init file can be found in `/sssh_server/Assets/bashrc` *this should change to a local directory*
 func initInteractive(ID string, historyPath string) *os.File {
 	// Handle pty size.
 	basePath, err := filepath.Abs("Assets/")

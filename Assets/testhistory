@@ -110,3 +110,4 @@ clear
 nano ~/.ssh/authorized_keys
 nano ~/.ssh/authorized_keys
 ls
+clear

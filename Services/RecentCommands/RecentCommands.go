@@ -29,6 +29,14 @@ func readFirstInt(s string) (r, charCount int) {
 	return
 }
 
+func Constructor(terminal *Terminal.Terminal) *RecentCommands {
+	rc := new(RecentCommands)
+	rc.Cmnds = []Command{}
+	rc.terminal = terminal
+	rc.ReadCommandsInFile()
+	return rc
+}
+
 func NewRecentCommands(terminal *Terminal.Terminal, f func([]Command)) *RecentCommands {
 	rc := new(RecentCommands)
 	rc.Cmnds = []Command{}

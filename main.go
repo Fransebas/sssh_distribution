@@ -11,7 +11,7 @@ import (
 	"sssh_server/CustomUtils"
 	"sssh_server/Services/CommandExecuter"
 	"sssh_server/Services/SSH"
-	"sssh_server/Services/SocketIO"
+	"sssh_server/Services/SessionLayer"
 )
 
 var port = flag.Int("port", 2000, "Select a port")
@@ -19,7 +19,7 @@ var port = flag.Int("port", 2000, "Select a port")
 var upgrader = websocket.Upgrader{}
 var commandExecuter CommandExecuter.CommandExecuter
 
-var socketService *SocketIO.SocketIOService
+var socketService *SessionLayer.SessionService
 
 func init() {
 	//recentCommandsSrvc.Socket = Sockets.NewSocketReadWriter()
@@ -44,12 +44,12 @@ func newCommand(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	flag.Parse()
-	// var s ssh.Session
+	// var s ssh.SSHSession
 
 	SSH.GenerateNewECSDAKey()
 	//r := mux.NewRouter()
 	mux := http.NewServeMux()
-	socketService = SocketIO.Constructor()
+	socketService = SessionLayer.Constructor()
 	// needed http
 	mux.HandleFunc("/newcommand", newCommand)
 

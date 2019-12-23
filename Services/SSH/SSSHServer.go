@@ -15,27 +15,27 @@ import (
 	"strings"
 )
 
-type Handler func(s *Session, w io.Writer, r io.Reader)
+type Handler func(s *SSHSession, w io.Writer, r io.Reader)
 
 type SSSHServer struct {
 	config            *ssh.ServerConfig
 	handlers          map[string]Handler
-	NewSessionHandler func(session *Session)
+	NewSessionHandler func(session *SSHSession)
 	authorizedKeysMap map[string]bool
 }
 
-type Session struct {
+type SSHSession struct {
 	ssh.Channel
 	conn     *ssh.ServerConn
 	channels <-chan ssh.NewChannel
 	reqs     <-chan *ssh.Request
 }
 
-func (session *Session) GetSessionID() string {
+func (session *SSHSession) GetSessionID() string {
 	return hex.EncodeToString(session.conn.SessionID())
 }
 
-func (server *SSSHServer) OnNewSession(f func(session *Session)) {
+func (server *SSSHServer) OnNewSession(f func(session *SSHSession)) {
 	server.NewSessionHandler = f
 }
 
@@ -84,11 +84,7 @@ func (server *SSSHServer) HandleFunc(msgType string, handler Handler) {
 	server.handlers[msgType] = handler
 }
 
-func (server *SSSHServer) initServer() {
-	server.ReadAuthorizedKeys(AUTHORIZED_KEYS_FILE)
-	if server.handlers == nil {
-		server.handlers = make(map[string]Handler)
-	}
+func (server *SSSHServer) initAuthCallbacks() {
 	// An SSH server is represented by a ServerConfig, which holds
 	// certificate details and handles authentication of ServerConns.
 	server.config = &ssh.ServerConfig{
@@ -116,6 +112,16 @@ func (server *SSSHServer) initServer() {
 			return nil, fmt.Errorf("unknown public key for %q", c.User())
 		},
 	}
+}
+
+func (server *SSSHServer) initServer() {
+	server.ReadAuthorizedKeys(AUTHORIZED_KEYS_FILE)
+	if server.handlers == nil {
+		server.handlers = make(map[string]Handler)
+	}
+	// An SSH server is represented by a ServerConfig, which holds
+	// certificate details and handles authentication of ServerConns.
+	server.initAuthCallbacks()
 	server.AddHostKeys()
 }
 
@@ -148,7 +154,7 @@ func (server *SSSHServer) serve() {
 		}
 
 		// Create a session for each incoming request
-		session := Session{
+		session := SSHSession{
 			conn:     conn,
 			channels: chans,
 			reqs:     reqs,
@@ -180,7 +186,7 @@ func (server *SSSHServer) serve() {
 	}
 }
 
-func (server *SSSHServer) AcceptRequests(in <-chan *ssh.Request, channel *ssh.Channel, session *Session) {
+func (server *SSSHServer) AcceptRequests(in <-chan *ssh.Request, channel *ssh.Channel, session *SSHSession) {
 	for req := range in {
 		switch req.Type {
 		case "subsystem":
@@ -221,7 +227,7 @@ func (s *SSSHServer) startSFTP(channel *ssh.Channel) {
 	}
 }
 
-func (server *SSSHServer) handleChannel(channel *ssh.Channel, session *Session, msgType string) {
+func (server *SSSHServer) handleChannel(channel *ssh.Channel, session *SSHSession, msgType string) {
 	// We don't care of the channel type, we will read the data
 	// and based on the first line we will multiplex the connection
 	// The first message should signal the type/mod they want to use
