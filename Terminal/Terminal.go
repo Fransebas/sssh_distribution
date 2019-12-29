@@ -53,7 +53,7 @@ func InitTerminal(id string, historyPath string) *Terminal {
 
 	// debug
 	var err error
-	t.tmp, err = os.Create("tmp")
+	t.tmp, err = os.Create("tmp2")
 	if err != nil {
 		panic(err)
 	}
@@ -87,6 +87,7 @@ func (t *Terminal) read() {
 	for i := 0; i < n; i++ {
 		t.buffer.Insert(b[i])
 	}
+	t.tmp.Write(b)
 }
 
 /*

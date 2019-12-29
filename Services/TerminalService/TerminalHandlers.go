@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/creack/pty"
 	"io"
-	"io/ioutil"
 	"sssh_server/CustomUtils"
 	"sssh_server/Services/API"
 )
@@ -42,7 +41,7 @@ func (ts *TerminalService) GetHandlers() []*API.RequestHandler {
 		RequestHandler: func(w io.Writer, r io.Reader) {
 			// On terminal connection opened
 			var resize pty.Winsize
-			b, err := ioutil.ReadAll(r)
+			b, err := CustomUtils.Read(r)
 			err = json.Unmarshal(b, &resize)
 			if err != nil {
 				ts.Terminal.SetSize(&resize)

@@ -9,9 +9,11 @@ import (
 	"sssh_server/Services/CommandExecuter"
 	"sssh_server/Services/CommandList"
 	"sssh_server/Services/EchoService"
+	"sssh_server/Services/GlobalVariables"
 	"sssh_server/Services/History"
 	"sssh_server/Services/SSH"
 	"sssh_server/Services/TerminalService"
+	"time"
 )
 
 /*
@@ -19,11 +21,14 @@ safe for copy
 underlying types use pointers to data
 */
 type TerminalSession struct {
-	ID          string
-	SSHSessions map[string]*SSH.SSHSession
-	HandlersMap map[string]API.SessionHandler
-	Services    []API.Service
-	Config      API.SessionConfig
+	ID            string
+	SSHSessions   map[string]*SSH.SSHSession    `json:"-"`
+	HandlersMap   map[string]API.SessionHandler `json:"-"`
+	Services      []API.Service                 `json:"-"`
+	Config        API.SessionConfig             `json:"-"`
+	TimeCreated   int64
+	LastConnected int64
+	Name          string
 }
 
 type SessionService struct {
@@ -76,6 +81,7 @@ func (s *SessionService) CreateSession(msgType string, sshSession *SSH.SSHSessio
 		// Lifecycle hook
 		terminalSession.OnNewSessionLifecycleHook()
 	}
+	terminalSession.LastConnected = time.Now().Unix()
 
 	// Lifecycle hook
 	terminalSession.OnNewConnectionLifecycleHook(sshSession)
@@ -135,10 +141,13 @@ func newSession(id string) (s *TerminalSession) {
 	s.SSHSessions = make(map[string]*SSH.SSHSession)
 	s.HandlersMap = make(map[string]API.SessionHandler)
 	s.ID = id
+	s.Name = id
 	//s.recentCommandsMutex.Lock()
 	//s.InitTerminal()
 	s.Services = []API.Service{}
 	s.InitConfig()
+	s.TimeCreated = time.Now().Unix()
+	s.LastConnected = time.Now().Unix()
 
 	addServices(s)
 
@@ -183,6 +192,7 @@ func addServices(terminalSession *TerminalSession) {
 	terminalSession.addService(new(CommandList.CommandListService))
 	terminalSession.addService(new(CommandExecuter.CommandExecuter))
 	terminalSession.addService(new(EchoService.EchoService))
+	terminalSession.addService(new(GlobalVariables.GlobalVariables))
 }
 
 var _ API.TerminalSessionInterface = (*TerminalSession)(nil)

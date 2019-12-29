@@ -3,9 +3,9 @@ package GlobalVariables
 import (
 	"encoding/json"
 	"os"
+	"sssh_server/Services/API"
 	"sssh_server/Services/CommandExecuter"
 	"sssh_server/Services/SSH"
-	"sssh_server/Services/SessionLayer"
 	"strings"
 )
 
@@ -49,5 +49,5 @@ func (*GlobalVariables) storeVariable(bashVar BashVar) error {
 	return os.Setenv(bashVar.Name, bashVar.Value)
 }
 
-func (*GlobalVariables) OnNewSession(s *SessionLayer.TerminalSession) {}
-func (*GlobalVariables) OnNewConnection(sshSession *SSH.SSHSession)   {}
+func (*GlobalVariables) OnNewSession(s API.TerminalSessionInterface) {}
+func (*GlobalVariables) OnNewConnection(sshSession *SSH.SSHSession)  {}
