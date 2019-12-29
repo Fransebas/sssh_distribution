@@ -3,6 +3,8 @@ package CommandExecuter
 import (
 	"os/exec"
 	"sssh_server/CustomUtils"
+	"sssh_server/Services/API"
+	"sssh_server/Services/SSH"
 )
 
 type CommandExecuter struct {
@@ -17,4 +19,11 @@ func (cme *CommandExecuter) ExecuteCommand(cmmnd string) string {
 	CustomUtils.CheckPrint(e)
 
 	return string(b)
+}
+
+func (cme *CommandExecuter) OnNewSession(session API.TerminalSessionInterface) {
+
+}
+func (cme *CommandExecuter) OnNewConnection(sshSession *SSH.SSHSession) {
+
 }

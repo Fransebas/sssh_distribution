@@ -3,23 +3,18 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/gorilla/websocket"
 	"github.com/rs/cors"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"sssh_server/CustomUtils"
-	"sssh_server/Services/CommandExecuter"
 	"sssh_server/Services/SSH"
 	"sssh_server/Services/SessionLayer"
 )
 
 var port = flag.Int("port", 2000, "Select a port")
 
-var upgrader = websocket.Upgrader{}
-var commandExecuter CommandExecuter.CommandExecuter
-
-var socketService *SessionLayer.SessionService
+var sessionService *SessionLayer.SessionService
 
 func init() {
 	//recentCommandsSrvc.Socket = Sockets.NewSocketReadWriter()
@@ -39,7 +34,7 @@ func newCommand(w http.ResponseWriter, r *http.Request) {
 	CustomUtils.CheckPrint(err)
 
 	id := r.URL.Query().Get("SSSH_USER")
-	socketService.AddCommand(string(b), id)
+	sessionService.AddCommand(string(b), id)
 }
 
 func main() {
@@ -49,13 +44,13 @@ func main() {
 	SSH.GenerateNewECSDAKey()
 	//r := mux.NewRouter()
 	mux := http.NewServeMux()
-	socketService = SessionLayer.Constructor()
+	sessionService = SessionLayer.Constructor()
 	// needed http
 	mux.HandleFunc("/newcommand", newCommand)
 
 	log.Printf("Serving at localhost:%v...\n", (*port))
 	handler := cors.Default().Handler(mux)
-	go socketService.Serve()
+	go sessionService.Serve()
 
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", (*port)), handler))
 }

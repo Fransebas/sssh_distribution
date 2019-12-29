@@ -16,10 +16,12 @@ import (
 )
 
 type Handler func(s *SSHSession, w io.Writer, r io.Reader)
+type AnyHandler func(msgType string, s *SSHSession, w io.Writer, r io.Reader)
 
 type SSSHServer struct {
 	config            *ssh.ServerConfig
 	handlers          map[string]Handler
+	AnyHandler        AnyHandler
 	NewSessionHandler func(session *SSHSession)
 	authorizedKeysMap map[string]bool
 }
@@ -75,6 +77,10 @@ func (server *SSSHServer) AddHostKeys() {
 		log.Fatal("Failed to parse private key: ", err)
 	}
 	server.config.AddHostKey(private)
+}
+
+func (server *SSSHServer) SetAnyHandler(f AnyHandler) {
+	server.AnyHandler = f
 }
 
 func (server *SSSHServer) HandleFunc(msgType string, handler Handler) {
@@ -237,18 +243,20 @@ func (server *SSSHServer) handleChannel(channel *ssh.Channel, session *SSHSessio
 	// TODO: deal with err
 	// _, _ = (*channel).Write([]byte("ack")) // Send the string ack signaling that the other side can start sending and receiving
 
-	f := server.handlers[msgType]
+	//f := server.handlers[msgType]
 
 	// I wonder if this will copy something by passing the value rather than the pointer, but Go wont let me pass the pointer as a io.Writer/Reader ...
 	// bitch
 	limitlessChannel := LimitlessChannel.LimitlessChannel{
 		Writer: *channel,
 	}
-	if f != nil {
-		f(session, limitlessChannel, *channel)
-	} else {
-		fmt.Println("No handler for this message " + msgType)
-	}
+
+	server.AnyHandler(msgType, session, limitlessChannel, *channel)
+	//if f != nil {
+	//	f(session, limitlessChannel, *channel)
+	//} else {
+	//	fmt.Println("No handler for this message " + msgType)
+	//}
 
 }
 

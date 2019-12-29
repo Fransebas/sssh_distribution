@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"math/rand"
+	"runtime/debug"
 )
 
 func CheckPanic(e error, msg string) {
@@ -14,7 +15,8 @@ func CheckPanic(e error, msg string) {
 
 func CheckPrint(e error) {
 	if e != nil {
-		fmt.Println("error : " + e.Error())
+		debug.PrintStack()
+		fmt.Println("error 5 : " + e.Error())
 	}
 }
 

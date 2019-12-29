@@ -6,26 +6,14 @@ import (
 	"os/exec"
 	"path/filepath"
 	"sssh_server/CustomUtils"
+	"sssh_server/Services/API"
 	"sssh_server/Services/RecentCommands/Models"
+	"sssh_server/Services/SSH"
 	"strings"
 )
 
-type CommandList struct {
+type CommandListService struct {
 	GetCommandsScriptPath string
-}
-
-func getContent(path string) string {
-	data, err := ioutil.ReadFile(path)
-	CustomUtils.CheckPrint(err)
-	return string(data)
-}
-
-func NewCommandList() (cl *CommandList) {
-	cl = new(CommandList)
-	basePath, err := filepath.Abs("Assets/Scripts")
-	cl.GetCommandsScriptPath = fmt.Sprintf("%v/%v", basePath, "get_commands")
-	CustomUtils.CheckPrint(err)
-	return
 }
 
 func processRaw(commandsRaw string) []Models.Command {
@@ -37,7 +25,14 @@ func processRaw(commandsRaw string) []Models.Command {
 	return commands
 }
 
-func (cl *CommandList) GetList(arg string) []Models.Command {
+func (cl *CommandListService) OnNewSession(session API.TerminalSessionInterface) {
+	basePath, err := filepath.Abs("Assets/Scripts")
+	cl.GetCommandsScriptPath = fmt.Sprintf("%v/%v", basePath, "get_commands")
+	CustomUtils.CheckPrint(err)
+}
+func (cl *CommandListService) OnNewConnection(sshSession *SSH.SSHSession) {}
+
+func (cl *CommandListService) getList(arg string) []Models.Command {
 	c := exec.Command("compgen", strings.Split(arg, " ")...)
 	b, e := c.Output()
 	CustomUtils.CheckPrint(e)
@@ -45,7 +40,7 @@ func (cl *CommandList) GetList(arg string) []Models.Command {
 	return processRaw(commandsRaw)
 }
 
-func (cl *CommandList) GetCommandsList() []Models.Command {
+func (cl *CommandListService) getCommandsList() []Models.Command {
 	data, err := ioutil.ReadFile(cl.GetCommandsScriptPath)
 	CustomUtils.CheckPrint(err)
 	//fmt.Printf("The data ist %v \n", string(data))
@@ -54,3 +49,5 @@ func (cl *CommandList) GetCommandsList() []Models.Command {
 	CustomUtils.CheckPrint(e)
 	return processRaw(string(b))
 }
+
+var _ API.Service = (*CommandListService)(nil) // Verify that *T implements I.

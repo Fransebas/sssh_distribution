@@ -52,6 +52,10 @@ func (lc LimitlessChannel) Write(p []byte) (n int, err error) {
 		_, e := lc.Writer.Write(b)
 
 		CustomUtils.CheckPrint(e)
+
+		if e != nil {
+			return 0, e
+		}
 	}
 	return l, nil
 }

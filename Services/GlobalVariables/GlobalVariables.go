@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"os"
 	"sssh_server/Services/CommandExecuter"
+	"sssh_server/Services/SSH"
+	"sssh_server/Services/SessionLayer"
 	"strings"
 )
 
@@ -15,7 +17,7 @@ type BashVar struct {
 	Value string
 }
 
-func (*GlobalVariables) GetVariables() string {
+func (*GlobalVariables) getVariables() string {
 	executer := CommandExecuter.CommandExecuter{}
 	res := executer.ExecuteCommand("env")
 	lines := strings.Split(res, "\n")
@@ -39,10 +41,13 @@ func (*GlobalVariables) GetVariables() string {
 	return string(b)
 }
 
-func (*GlobalVariables) StoreVariable(bashVar BashVar) error {
+func (*GlobalVariables) storeVariable(bashVar BashVar) error {
 	//executer := CommandExecuter.CommandExecuter{}
 	// TODO : create function
 	//executer.ExecuteCommand(fmt.Sprintf( "export %v=%v", bashVar.Name, bashVar.Value))
 
 	return os.Setenv(bashVar.Name, bashVar.Value)
 }
+
+func (*GlobalVariables) OnNewSession(s *SessionLayer.TerminalSession) {}
+func (*GlobalVariables) OnNewConnection(sshSession *SSH.SSHSession)   {}

@@ -17,34 +17,54 @@ const (
 	relativePath = "Assets/bashrc.sh"
 )
 
-var FILE_NAME = "testhistory" // Constant for now, but this should change per session or user
-
 /*
 Holds all the important things that make up a terminal
 Safe for copy, all types are pointers
 */
 type Terminal struct {
-	ptmx            *os.File
-	ch              *chan os.Signal
-	state           *terminal.State
-	resizeMux       *sync.Mutex
-	user            *SSH.User
-	HistoryFilePath string
+	ptmx      *os.File
+	ch        *chan os.Signal
+	state     *terminal.State
+	resizeMux *sync.Mutex
+	user      *SSH.User
+	tmp       *os.File
+	buffer    *CustomUtils.FixedDeque
 	//srw *io.ReadWriter
 }
 
+func (t *Terminal) GetReader() TerminalReader {
+	tr := TerminalReader{}
+	tr.buffer = t.buffer
+	tr.offset = 0
+	tr.terminal = t
+	return tr
+}
+
+func (t *Terminal) GetBuffer() []byte {
+	return t.buffer.Bytes()
+}
+
 // Constructor
-func InitTerminal(id string) *Terminal {
+func InitTerminal(id string, historyPath string) *Terminal {
 	var t Terminal
 
+	t.buffer = CustomUtils.New(1000000) /// 1000000 is 1 MB maybe I should use less
 	t.resizeMux = new(sync.Mutex)
 
-	// The file base path is the Assets, maybe there is a better place like /etc or something
-	basePath, err := filepath.Abs("Assets/")
-	CustomUtils.CheckPanic(err, "Could not create history file for the session")
-	t.HistoryFilePath = fmt.Sprintf("%v/%v", basePath, FILE_NAME)
+	// debug
+	var err error
+	t.tmp, err = os.Create("tmp")
+	if err != nil {
+		panic(err)
+	}
+	// end
 
-	t.ptmx = initInteractive(id, t.HistoryFilePath)
+	// The file base path is the Assets, maybe there is a better place like /etc or something
+	//basePath, err := filepath.Abs("Assets/")
+	//CustomUtils.CheckPanic(err, "Could not create history file for the session")
+	//t.HistoryFilePath = fmt.Sprintf("%v/%v", basePath, FILE_NAME)
+
+	t.ptmx = initInteractive(id, historyPath)
 	return &t
 }
 
@@ -54,7 +74,19 @@ func (t *Terminal) Write(b []byte) (int, error) {
 }
 
 func (t *Terminal) Read(b []byte) (int, error) {
-	return t.ptmx.Read(b)
+	n, e := t.ptmx.Read(b)
+	for i := 0; i < n; i++ {
+		t.buffer.Insert(b[i])
+	}
+	return n, e
+}
+
+func (t *Terminal) read() {
+	b := make([]byte, 32*1024)
+	n, _ := t.ptmx.Read(b)
+	for i := 0; i < n; i++ {
+		t.buffer.Insert(b[i])
+	}
 }
 
 /*
@@ -65,7 +97,7 @@ the socket or whatever interface that comunicates with it need to implement the 
 
 Don't know if this should use the "go func" or the calling function 🤷🏼‍♂️
 */
-//func (t *Terminal) ContinuousRead(writer io.Writer) {
+//func (t *TerminalService) ContinuousRead(writer io.Writer) {
 //	go func() { _, _ = io.Copy(writer, t.ptmx) }()
 //}
 
@@ -129,11 +161,11 @@ func initInteractive(ID string, historyPath string) *os.File {
 	c := exec.Command("bash", "-c", bash)
 
 	//c := exec.Command("bash", "--rcfile", path, "-i")
-	CustomUtils.CheckPanic(err, "Could not initialize Terminal")
+	//CustomUtils.CheckPanic(err, "Could not initialize TerminalService")
 	// Start the command with a pty.
 
 	ptmx, err := pty.Start(c)
-	CustomUtils.CheckPanic(err, "Could not initialize Terminal")
+	CustomUtils.CheckPanic(err, "Could not initialize TerminalService")
 
 	return ptmx
 }
@@ -145,7 +177,7 @@ func initInteractive(ID string, historyPath string) *os.File {
 //	// Start the command with a pty.
 //	ptmx, err := pty.Start(c)
 //	initialCmds(ptmx)
-//	CustomUtils.CheckPanic(err, "Could not initialize Terminal");
+//	CustomUtils.CheckPanic(err, "Could not initialize TerminalService");
 //	return ptmx
 //}
 //
