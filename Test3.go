@@ -23,7 +23,7 @@ func Test4() {
 	}
 	defer conn.Close()
 
-	// Request the remote side to open port 8080 on all interfaces.
+	// Request the remote side to open portPtr 8080 on all interfaces.
 	l, err := conn.Listen("tcp", "0.0.0.0:60")
 	if err != nil {
 		log.Fatal("unable to register tcp forward: ", err)

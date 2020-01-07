@@ -1,18 +1,13 @@
 package SessionLayer
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"path/filepath"
 	"sssh_server/CustomUtils"
 	"sssh_server/Services/API"
-	"sssh_server/Services/CommandExecuter"
-	"sssh_server/Services/CommandList"
-	"sssh_server/Services/EchoService"
-	"sssh_server/Services/GlobalVariables"
-	"sssh_server/Services/History"
 	"sssh_server/Services/SSH"
-	"sssh_server/Services/TerminalService"
 	"time"
 )
 
@@ -88,7 +83,12 @@ func (s *SessionService) CreateSession(msgType string, sshSession *SSH.SSHSessio
 
 	s.SSHidToTerminalID[sshSession.GetSessionID()] = sessionID
 
-	w.Write([]byte("\n"))
+	bytesSession, _ := json.Marshal(terminalSession)
+	_, _ = w.Write(bytesSession)
+}
+
+func (s *SessionService) changeSessionName(name, id string) {
+	s.Sessions[id].Name = name
 }
 
 // Make the mapping for any kind of messages
@@ -99,6 +99,22 @@ func (s *SessionService) ChannelHandler() {
 		if msgType == "session" {
 			// On the session message create a new session
 			s.CreateSession(msgType, sshSession, w, r)
+		} else if msgType == "open.sessions" {
+			// Return all the open sessions for the client to choose
+			var sessions = []*TerminalSession{}
+			for _, session := range s.Sessions {
+				sessions = append(sessions, session)
+			}
+			b, e := json.Marshal(sessions)
+			CustomUtils.CheckPanic(e, "Unable to parse sessions, this should never happen")
+			_, e = w.Write(b)
+			CustomUtils.CheckPrint(e)
+		} else if msgType == "session.name" {
+			b, _ := CustomUtils.Read(r)
+			var auxSession TerminalSession
+			_ = json.Unmarshal(b, &auxSession)
+			s.changeSessionName(auxSession.Name, auxSession.ID)
+
 		} else {
 			terminalSession := s.SSHSessionToTerminalSession(sshSession)
 			if handler, ok := terminalSession.HandlersMap[msgType]; ok {
@@ -116,12 +132,23 @@ func (s *SessionService) Serve() {
 
 // Adds a new command to the recently used commands
 func (ss *SessionService) AddCommand(data string, id string) {
-	fmt.Printf("data %v \n", data)
 	if _, ok := ss.Sessions[id]; ok {
 		session := ss.Sessions[id]
 		for _, service := range session.Services {
 			if historyService, ok := service.(API.HistoryService); ok {
 				historyService.OnNewCommand(data)
+			}
+		}
+	}
+}
+
+// Updates the variables
+func (ss *SessionService) UpdateVariables(data string, id string) {
+	if _, ok := ss.Sessions[id]; ok {
+		session := ss.Sessions[id]
+		for _, service := range session.Services {
+			if variablesService, ok := service.(API.VariablesService); ok {
+				variablesService.OnUpdateVariables(data)
 			}
 		}
 	}
@@ -187,12 +214,9 @@ func (s *TerminalSession) OnNewConnectionLifecycleHook(sshSession *SSH.SSHSessio
 }
 
 func addServices(terminalSession *TerminalSession) {
-	terminalSession.addService(new(TerminalService.TerminalService))
-	terminalSession.addService(new(History.History))
-	terminalSession.addService(new(CommandList.CommandListService))
-	terminalSession.addService(new(CommandExecuter.CommandExecuter))
-	terminalSession.addService(new(EchoService.EchoService))
-	terminalSession.addService(new(GlobalVariables.GlobalVariables))
+	for _, service := range Services {
+		terminalSession.addService(service)
+	}
 }
 
 var _ API.TerminalSessionInterface = (*TerminalSession)(nil)

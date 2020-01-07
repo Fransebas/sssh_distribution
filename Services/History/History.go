@@ -3,6 +3,7 @@ package History
 import (
 	"bufio"
 	"io/ioutil"
+	"os"
 	"sssh_server/CustomUtils"
 	"sssh_server/Services/API"
 	"sssh_server/Services/SSH"
@@ -34,19 +35,34 @@ func (h *History) OnNewConnection(sshSession *SSH.SSHSession) {
 
 }
 
+func fileExist(name string) (bool, error) {
+	_, err := os.Stat(name)
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return err != nil, err
+}
+
 func processFiles(s string) string {
 	lines := strings.Split(s, "\n")
 	out := ""
 	i := 0
 	for _, l := range lines {
+		if l == "" {
+			continue
+		}
 		out += strconv.Itoa(i) + " " + l + "\n"
+		i++
 	}
 	return out
 }
 
 func (h *History) readCommandsInFile(filepath string) {
-	data, err := ioutil.ReadFile(filepath)
-	CustomUtils.CheckPrint(err)
+	f, err := os.Create(filepath)
+	CustomUtils.CheckPanic(err, "Could not read history file with path "+filepath)
+	data, err := ioutil.ReadAll(f)
+	CustomUtils.CheckPanic(err, "Could not read history file with path "+filepath)
+	_ = f.Close()
 	h.updateRecentCommands(processFiles(string(data)))
 }
 
@@ -83,8 +99,9 @@ func (h *History) updateRecentCommands(rawData string) []Command {
 		}
 		// fmt.Println("cmd : " + cmnd + "9999\n")
 		cmd := commandFromStr(cmnd)
-		newCmnds = append(newCmnds, cmd)
-
+		if cmd.Index > len(h.Cmnds) {
+			newCmnds = append(newCmnds, cmd)
+		}
 	}
 	h.Cmnds = append(h.Cmnds, newCmnds...)
 	if h.OnCommandsUpdateF != nil {

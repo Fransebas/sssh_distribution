@@ -1,13 +1,23 @@
 #history -anrw $HIST_FILE_NAME
 
+# Colors in the terminal
+
+export PS1="\[\033[36m\]\u\[\033[m\]@\[\033[32m\]\h:\[\033[33;1m\]\w\[\033[m\]\$ "
+export CLICOLOR=1
+export LSCOLORS=ExFxBxDxCxegedabagacad
+alias ls='ls -GFh'
+
+# End Colors
+
+# Set up of history File
 if [ ! -e "$HIST_FILE_NAME" ] ; then
     touch "$HIST_FILE_NAME"
 fi
 
 export HISTFILE=$HIST_FILE_NAME
-echo $HISTFILE
-
 export HISTCONTROL=ignorespace ; history -d 1
+
+# End Set up of history File
 
 # curl --data "$(history)" http://localhost:2000/newcommand?SSSH_USER=$SSSH_USER &> /dev/null
 
@@ -15,15 +25,13 @@ export HISTCONTROL=ignorespace ; history -d 1
 # curl --data "$(history)" http://localhost:2000/newcommand?SSSH_USER=$SSSH_USER
 # export PROMPT_COMMAND='curl --data "$(history 1)" http://localhost:2000/newcommand?SSSH_USER=$SSSH_USER'
 
-
-
-echo HIST_FILE_NAME
-echo $HIST_FILE_NAME
-
 # This is for production
 curl --data "$(history)" http://localhost:2000/newcommand?SSSH_USER=$SSSH_USER &> /dev/null
-export PROMPT_COMMAND='curl --data "$(history 1)" http://localhost:2000/newcommand?SSSH_USER=$SSSH_USER &> /dev/null'
+# export PROMPT_COMMAND='curl --data "$(history 1)" http://localhost:2000/newcommand?SSSH_USER=$SSSH_USER &> /dev/null'
+
+export PROMPT_COMMAND='$SSSH -mode=prompt -userid=$SSSH_USER -history="$(history 1)"'
 
 ~/.bashrc
 
-bash -l
+ cd
+

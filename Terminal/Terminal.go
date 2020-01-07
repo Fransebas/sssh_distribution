@@ -158,7 +158,9 @@ func initInteractive(ID string, historyPath string) *os.File {
 	fmt.Println("path " + path)
 
 	// Send the initialization file the variables it's going to use
-	bash := fmt.Sprintf("export SSSH_USER=%v; export HIST_FILE_NAME=%v; bash --rcfile %s -i ", ID, historyPath, path)
+	// TODO: fix the absolute path thingy
+	_ = os.Setenv("SYMBIONT", "~/go/src/symbiont/main.go")
+	bash := fmt.Sprintf("export SSSH=%v; export SSSH_USER=%v; export HIST_FILE_NAME=%v; bash --rcfile %s -i ", "~/go/src/sssh_server/sssh_server", ID, historyPath, path)
 	c := exec.Command("bash", "-c", bash)
 
 	//c := exec.Command("bash", "--rcfile", path, "-i")

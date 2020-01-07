@@ -2,6 +2,7 @@ package GlobalVariables
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"sssh_server/Services/API"
 	"sssh_server/Services/CommandExecuter"
@@ -10,6 +11,7 @@ import (
 )
 
 type GlobalVariables struct {
+	vars string
 }
 
 type BashVar struct {
@@ -17,10 +19,10 @@ type BashVar struct {
 	Value string
 }
 
-func (*GlobalVariables) getVariables() string {
-	executer := CommandExecuter.CommandExecuter{}
-	res := executer.ExecuteCommand("env")
-	lines := strings.Split(res, "\n")
+func (g *GlobalVariables) getVariables() string {
+	//executer := CommandExecuter.CommandExecuter{}
+	//res := executer.ExecuteCommand("env")
+	lines := strings.Split(g.vars, "\n")
 	variables := []BashVar{}
 	for _, line := range lines {
 		if line == "" {
@@ -51,3 +53,19 @@ func (*GlobalVariables) storeVariable(bashVar BashVar) error {
 
 func (*GlobalVariables) OnNewSession(s API.TerminalSessionInterface) {}
 func (*GlobalVariables) OnNewConnection(sshSession *SSH.SSHSession)  {}
+
+func (*GlobalVariables) GetClientCode() API.ClientCode {
+	return func(cmnd string) string {
+		exec := CommandExecuter.CommandExecuter{}
+		return exec.ExecuteCommand("env")
+	}
+}
+
+func (*GlobalVariables) GetName() string {
+	return "GlobalVariables"
+}
+
+func (g *GlobalVariables) ClientResponse(res string) {
+	fmt.Println("response!!!!" + res)
+	g.vars = res
+}
