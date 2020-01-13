@@ -1,13 +1,13 @@
 package SessionLayer
 
 import (
-	"sssh_server/Services/API"
-	"sssh_server/Services/CommandExecuter"
-	"sssh_server/Services/CommandList"
-	"sssh_server/Services/EchoService"
-	"sssh_server/Services/GlobalVariables"
-	"sssh_server/Services/History"
-	"sssh_server/Services/TerminalService"
+	"sssh_server/Modules/API"
+	"sssh_server/Modules/CommandExecuter"
+	"sssh_server/Modules/CommandList"
+	"sssh_server/Modules/EchoService"
+	"sssh_server/Modules/GlobalVariables"
+	"sssh_server/Modules/History"
+	"sssh_server/Modules/TerminalService"
 )
 
 var rawServices []interface{} = []interface{}{
@@ -20,13 +20,13 @@ var rawServices []interface{} = []interface{}{
 }
 
 // List of all the available services
-var Services []API.Service = []API.Service{}
+var Services []API.Module = []API.Module{}
 
 // List of the services that implement the API.OnCommandService interface
 var CommandServices []API.OnCommandService = []API.OnCommandService{}
 
 func clasify(i interface{}) {
-	if s, ok := i.(API.Service); ok {
+	if s, ok := i.(API.Module); ok {
 		Services = append(Services, s)
 	}
 	if s, ok := i.(API.OnCommandService); ok {

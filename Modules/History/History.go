@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 	"os"
 	"sssh_server/CustomUtils"
-	"sssh_server/Services/API"
-	"sssh_server/Services/SSH"
+	"sssh_server/Modules/API"
+	"sssh_server/Modules/SSH"
 	"strconv"
 	"strings"
 )
@@ -110,6 +110,6 @@ func (h *History) updateRecentCommands(rawData string) []Command {
 	return newCmnds
 }
 
-//var _ API.Service = History{}       // Verify that T implements I.
-var _ API.Service = (*History)(nil)        // Verify that *T implements I.
+//var _ API.Module = History{}       // Verify that T implements I.
+var _ API.Module = (*History)(nil)         // Verify that *T implements I.
 var _ API.HistoryService = (*History)(nil) // Verify that *T implements I.

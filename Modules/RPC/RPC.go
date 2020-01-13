@@ -7,8 +7,8 @@ import (
 	"net/rpc"
 	"reflect"
 	"sssh_server/CustomUtils"
-	"sssh_server/Services/API"
-	"sssh_server/Services/SessionLayer"
+	"sssh_server/Modules/API"
+	"sssh_server/Modules/SessionLayer"
 )
 
 type RPC struct {

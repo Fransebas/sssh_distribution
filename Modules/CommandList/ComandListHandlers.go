@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"sssh_server/CustomUtils"
-	"sssh_server/Services/API"
+	"sssh_server/Modules/API"
 )
 
 func (cl *CommandListService) GetHandlers() []*API.RequestHandler {

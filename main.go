@@ -8,10 +8,10 @@ import (
 	"log"
 	"net/http"
 	"sssh_server/CustomUtils"
-	"sssh_server/Services/CommandExecuter"
-	"sssh_server/Services/RPC"
-	"sssh_server/Services/SSH"
-	"sssh_server/Services/SessionLayer"
+	"sssh_server/Modules/CommandExecuter"
+	"sssh_server/Modules/RPC"
+	"sssh_server/Modules/SSH"
+	"sssh_server/Modules/SessionLayer"
 	"strings"
 )
 
@@ -37,30 +37,26 @@ func init() {
 // The bash command detects a new command and reports it back to the server
 func newCommand(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
+	CustomUtils.CheckPrint(err)
 
 	_, _ = fmt.Fprintln(w, "ok")
 	flusher, _ := w.(http.Flusher)
 	flusher.Flush()
 
-	CustomUtils.CheckPrint(err)
-
 	id := r.URL.Query().Get("SSSH_USER")
-	fmt.Println("SSSH_USER = " + id)
 	sessionService.AddCommand(string(b), id)
 	//rpc.OnCommand(string(b))
 }
 
 func variables(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
+	CustomUtils.CheckPrint(err)
 
 	_, _ = fmt.Fprintln(w, "ok")
 	flusher, _ := w.(http.Flusher)
 	flusher.Flush()
 
-	CustomUtils.CheckPrint(err)
-
 	id := r.URL.Query().Get("SSSH_USER")
-	fmt.Println("SSSH_USER = " + id)
 	sessionService.UpdateVariables(string(b), id)
 	//rpc.OnCommand(string(b))
 }
@@ -76,7 +72,7 @@ func server() {
 	sessionService = SessionLayer.Constructor()
 	// needed http
 	mux.HandleFunc("/newcommand", newCommand)
-	mux.HandleFunc("/variables", newCommand)
+	mux.HandleFunc("/variables", variables)
 
 	log.Printf("Serving at localhost:%v...\n", (*portPtr))
 	handler := cors.Default().Handler(mux)
@@ -89,12 +85,12 @@ func server() {
 func updateVariables() {
 	exec := CommandExecuter.CommandExecuter{}
 	data := exec.ExecuteCommand("env")
-	_, e := http.Post(fmt.Sprintf("http://localhost:2000/newcommand?SSSH_USER=%v", *userIdPtr), "text/html", strings.NewReader(data))
+	_, e := http.Post(fmt.Sprintf("http://localhost:2000/variables?SSSH_USER=%v", *userIdPtr), "text/html", strings.NewReader(data))
 	CustomUtils.CheckPrint(e)
 }
 
 func prompt() {
-	_, e := http.Post(fmt.Sprintf("http://localhost:2000/variables?SSSH_USER=%v", *userIdPtr), "text/html", strings.NewReader(*historyPtr))
+	_, e := http.Post(fmt.Sprintf("http://localhost:2000/newcommand?SSSH_USER=%v", *userIdPtr), "text/html", strings.NewReader(*historyPtr))
 	CustomUtils.CheckPrint(e)
 	updateVariables()
 }

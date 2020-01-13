@@ -6,9 +6,9 @@ import (
 	"os/exec"
 	"path/filepath"
 	"sssh_server/CustomUtils"
-	"sssh_server/Services/API"
-	"sssh_server/Services/RecentCommands/Models"
-	"sssh_server/Services/SSH"
+	"sssh_server/Modules/API"
+	"sssh_server/Modules/RecentCommands/Models"
+	"sssh_server/Modules/SSH"
 	"strings"
 )
 
@@ -50,4 +50,4 @@ func (cl *CommandListService) getCommandsList() []Models.Command {
 	return processRaw(string(b))
 }
 
-var _ API.Service = (*CommandListService)(nil) // Verify that *T implements I.
+var _ API.Module = (*CommandListService)(nil) // Verify that *T implements I.

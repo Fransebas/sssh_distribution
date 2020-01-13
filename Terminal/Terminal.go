@@ -9,7 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"sssh_server/CustomUtils"
-	"sssh_server/Services/SSH"
+	"sssh_server/Modules/SSH"
 	"sync"
 )
 

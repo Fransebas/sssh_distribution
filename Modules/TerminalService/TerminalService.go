@@ -1,8 +1,8 @@
 package TerminalService
 
 import (
-	"sssh_server/Services/API"
-	"sssh_server/Services/SSH"
+	"sssh_server/Modules/API"
+	"sssh_server/Modules/SSH"
 	"sssh_server/Terminal"
 )
 
@@ -20,4 +20,4 @@ func (ts *TerminalService) OnNewConnection(sshSession *SSH.SSHSession) {
 
 }
 
-var _ API.Service = (*TerminalService)(nil) // Verify that *T implements I.
+var _ API.Module = (*TerminalService)(nil) // Verify that *T implements I.

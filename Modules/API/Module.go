@@ -2,7 +2,7 @@ package API
 
 import (
 	"io"
-	"sssh_server/Services/SSH"
+	"sssh_server/Modules/SSH"
 )
 
 type SessionHandler func(w io.Writer, r io.Reader)
@@ -12,7 +12,7 @@ type TerminalSessionInterface interface {
 	GetConfig() SessionConfig
 }
 
-type Service interface {
+type Module interface {
 	OnNewSession(s TerminalSessionInterface)
 	OnNewConnection(sshSession *SSH.SSHSession)
 	GetHandlers() []*RequestHandler

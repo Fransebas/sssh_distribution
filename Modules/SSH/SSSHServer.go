@@ -11,7 +11,7 @@ import (
 	"log"
 	"net"
 	"os"
-	"sssh_server/Services/SSH/LimitlessChannel"
+	"sssh_server/Modules/SSH/LimitlessChannel"
 	"strings"
 )
 

@@ -5,7 +5,7 @@ import (
 	"github.com/creack/pty"
 	"io"
 	"sssh_server/CustomUtils"
-	"sssh_server/Services/API"
+	"sssh_server/Modules/API"
 )
 
 func (ts *TerminalService) GetHandlers() []*API.RequestHandler {

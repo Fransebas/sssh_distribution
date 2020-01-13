@@ -3,7 +3,7 @@ package History
 import (
 	"encoding/json"
 	"io"
-	"sssh_server/Services/API"
+	"sssh_server/Modules/API"
 )
 
 func (h *History) GetHandlers() []*API.RequestHandler {

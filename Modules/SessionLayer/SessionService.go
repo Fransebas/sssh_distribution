@@ -6,8 +6,8 @@ import (
 	"io"
 	"path/filepath"
 	"sssh_server/CustomUtils"
-	"sssh_server/Services/API"
-	"sssh_server/Services/SSH"
+	"sssh_server/Modules/API"
+	"sssh_server/Modules/SSH"
 	"time"
 )
 
@@ -19,7 +19,7 @@ type TerminalSession struct {
 	ID            string
 	SSHSessions   map[string]*SSH.SSHSession    `json:"-"`
 	HandlersMap   map[string]API.SessionHandler `json:"-"`
-	Services      []API.Service                 `json:"-"`
+	Modules       []API.Module                  `json:"-"`
 	Config        API.SessionConfig             `json:"-"`
 	TimeCreated   int64
 	LastConnected int64
@@ -134,7 +134,7 @@ func (s *SessionService) Serve() {
 func (ss *SessionService) AddCommand(data string, id string) {
 	if _, ok := ss.Sessions[id]; ok {
 		session := ss.Sessions[id]
-		for _, service := range session.Services {
+		for _, service := range session.Modules {
 			if historyService, ok := service.(API.HistoryService); ok {
 				historyService.OnNewCommand(data)
 			}
@@ -146,7 +146,7 @@ func (ss *SessionService) AddCommand(data string, id string) {
 func (ss *SessionService) UpdateVariables(data string, id string) {
 	if _, ok := ss.Sessions[id]; ok {
 		session := ss.Sessions[id]
-		for _, service := range session.Services {
+		for _, service := range session.Modules {
 			if variablesService, ok := service.(API.VariablesService); ok {
 				variablesService.OnUpdateVariables(data)
 			}
@@ -154,8 +154,8 @@ func (ss *SessionService) UpdateVariables(data string, id string) {
 	}
 }
 
-func (s *TerminalSession) addService(service API.Service) {
-	s.Services = append(s.Services, service)
+func (s *TerminalSession) addService(service API.Module) {
+	s.Modules = append(s.Modules, service)
 	handlers := service.GetHandlers()
 	for _, handler := range handlers {
 		s.HandlersMap[handler.Name] = handler.RequestHandler
@@ -171,7 +171,7 @@ func newSession(id string) (s *TerminalSession) {
 	s.Name = id
 	//s.recentCommandsMutex.Lock()
 	//s.InitTerminal()
-	s.Services = []API.Service{}
+	s.Modules = []API.Module{}
 	s.InitConfig()
 	s.TimeCreated = time.Now().Unix()
 	s.LastConnected = time.Now().Unix()
@@ -201,14 +201,14 @@ func (s *TerminalSession) InitConfig() {
 
 func (s *TerminalSession) OnNewSessionLifecycleHook() {
 	// Call lifecycle hooks on the service
-	for _, service := range s.Services {
+	for _, service := range s.Modules {
 		service.OnNewSession(s)
 	}
 }
 
 func (s *TerminalSession) OnNewConnectionLifecycleHook(sshSession *SSH.SSHSession) {
 	// Call lifecycle hooks on the service
-	for _, service := range s.Services {
+	for _, service := range s.Modules {
 		service.OnNewConnection(sshSession)
 	}
 }

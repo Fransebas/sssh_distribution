@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 	"sssh_server/CustomUtils"
-	"sssh_server/Services/API"
+	"sssh_server/Modules/API"
 )
 
 func (cme *CommandExecuter) GetHandlers() []*API.RequestHandler {

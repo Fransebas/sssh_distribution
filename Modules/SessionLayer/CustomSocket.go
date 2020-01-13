@@ -6,7 +6,7 @@ import (
 	"github.com/gorilla/websocket"
 	"net/http"
 	"sssh_server/CustomUtils"
-	"sssh_server/Services/SSH"
+	"sssh_server/Modules/SSH"
 	"sync"
 	"time"
 )

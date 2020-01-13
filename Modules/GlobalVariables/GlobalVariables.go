@@ -2,11 +2,9 @@ package GlobalVariables
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
-	"sssh_server/Services/API"
-	"sssh_server/Services/CommandExecuter"
-	"sssh_server/Services/SSH"
+	"sssh_server/Modules/API"
+	"sssh_server/Modules/SSH"
 	"strings"
 )
 
@@ -54,18 +52,6 @@ func (*GlobalVariables) storeVariable(bashVar BashVar) error {
 func (*GlobalVariables) OnNewSession(s API.TerminalSessionInterface) {}
 func (*GlobalVariables) OnNewConnection(sshSession *SSH.SSHSession)  {}
 
-func (*GlobalVariables) GetClientCode() API.ClientCode {
-	return func(cmnd string) string {
-		exec := CommandExecuter.CommandExecuter{}
-		return exec.ExecuteCommand("env")
-	}
-}
-
-func (*GlobalVariables) GetName() string {
-	return "GlobalVariables"
-}
-
-func (g *GlobalVariables) ClientResponse(res string) {
-	fmt.Println("response!!!!" + res)
-	g.vars = res
+func (g *GlobalVariables) OnUpdateVariables(vars string) {
+	g.vars = vars
 }

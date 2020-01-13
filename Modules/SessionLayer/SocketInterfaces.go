@@ -4,7 +4,7 @@ import (
 	"github.com/desertbit/glue"
 	"github.com/graarh/golang-socketio"
 	"net/http"
-	"sssh_server/Services/SSH"
+	"sssh_server/Modules/SSH"
 )
 
 type Connection interface {
