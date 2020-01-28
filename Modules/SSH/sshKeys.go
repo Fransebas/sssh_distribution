@@ -7,13 +7,25 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"encoding/base64"
 	"encoding/pem"
 	"fmt"
+	"github.com/tyler-smith/go-bip39"
+	"golang.org/x/crypto/ssh"
+	"io/ioutil"
 	"log"
 	"math/big"
 	"net"
 	"os"
+	"sssh_server/CustomUtils"
+	"strings"
 	"time"
+)
+
+// Valid KEY types
+const (
+	RSA   = "rsa"
+	ECDSA = "ecdsa"
 )
 
 func publicKey(priv interface{}) interface{} {
@@ -108,4 +120,46 @@ func GenerateNewECSDAKey() (certPEMBlock, keyPEMBlock []byte) {
 	keyPEMBlock = pemBlockForKey(priv).Bytes
 	SaveFiles(priv, certPEMBlock)
 	return
+}
+
+func MakeMnemonic(pubKey []byte) (string, error) {
+	hash, e := GetKeyHash(pubKey)
+	if e != nil {
+		return "", e
+	}
+	return bip39.NewMnemonic(hash)
+}
+
+func GetKeyHash(pubKey []byte) ([]byte, error) {
+	var res = CustomUtils.ExecuteCommand(fmt.Sprintf(`ssh-keygen -q -l -F localhost -f /dev/stdin <<<"localhost %v"`, string(pubKey)))
+	hash := strings.Split(strings.Split(res, " ")[2], ":")[1]
+	return base64.RawStdEncoding.DecodeString(hash)
+}
+
+// MakeSSHKeyPair make a pair of public and private keys for SSH access.
+// Public key is encoded in the format for inclusion in an OpenSSH authorized_keys file.
+// Private Key generated is PEM encoded
+func MakeSSHKeyPair(privateKeyPath, pubKeyPath string) error {
+	privateKey, err := rsa.GenerateKey(rand.Reader, 1024)
+	if err != nil {
+		return err
+	}
+
+	// generate and write private key as PEM
+	privateKeyFile, err := os.Create(privateKeyPath)
+	defer privateKeyFile.Close()
+	if err != nil {
+		return err
+	}
+	privateKeyPEM := &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(privateKey)}
+	if err := pem.Encode(privateKeyFile, privateKeyPEM); err != nil {
+		return err
+	}
+
+	// generate and write public key
+	pub, err := ssh.NewPublicKey(&privateKey.PublicKey)
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile(pubKeyPath, ssh.MarshalAuthorizedKey(pub), 0655)
 }

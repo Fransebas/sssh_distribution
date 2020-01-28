@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"math/rand"
+	"os/exec"
 	"runtime/debug"
 )
 
@@ -24,6 +25,14 @@ func Read(r io.Reader) ([]byte, error) {
 	b := make([]byte, 1024*8)
 	l, e := r.Read(b)
 	return b[:l], e
+}
+
+func ExecuteCommand(cmmnd string) string {
+	c := exec.Command("bash", "-c", cmmnd)
+	b, e := c.Output()
+	CheckPrint(e)
+
+	return string(b)
 }
 
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")

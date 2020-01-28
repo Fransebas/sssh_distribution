@@ -24,6 +24,8 @@ type SSSHServer struct {
 	AnyHandler        AnyHandler
 	NewSessionHandler func(session *SSHSession)
 	authorizedKeysMap map[string]bool
+	KeyPath           string // Path for the host key i.e. /etc/ssh/id_rsa or a custom path
+	hasBeenInit       bool
 }
 
 type SSHSession struct {
@@ -66,10 +68,10 @@ func (server *SSSHServer) ReadAuthorizedKeys(path string) {
 
 }
 
-func (server *SSSHServer) AddHostKeys() {
-	privateBytes, err := ioutil.ReadFile("id_rsa")
+func (server *SSSHServer) AddHostKeys(KeyPath string) {
+	privateBytes, err := ioutil.ReadFile(KeyPath)
 	if err != nil {
-		log.Fatal("Failed to load private key: ", err)
+		log.Fatal("Failed to load private key, Do you have the right permissions?: ", err)
 	}
 
 	private, err := ssh.ParsePrivateKey(privateBytes)
@@ -120,7 +122,8 @@ func (server *SSSHServer) initAuthCallbacks() {
 	}
 }
 
-func (server *SSSHServer) initServer() {
+func (server *SSSHServer) InitServer(KeyPath string) {
+	server.hasBeenInit = true
 	server.ReadAuthorizedKeys(AUTHORIZED_KEYS_FILE)
 	if server.handlers == nil {
 		server.handlers = make(map[string]Handler)
@@ -128,11 +131,13 @@ func (server *SSSHServer) initServer() {
 	// An SSH server is represented by a ServerConfig, which holds
 	// certificate details and handles authentication of ServerConns.
 	server.initAuthCallbacks()
-	server.AddHostKeys()
+	server.AddHostKeys(KeyPath)
 }
 
 func (server *SSSHServer) ListenAndServe() {
-	server.initServer()
+	if !server.hasBeenInit {
+		panic("Server hasn't been initialized, call initServer(KeyPath string) first")
+	}
 	server.serve()
 }
 

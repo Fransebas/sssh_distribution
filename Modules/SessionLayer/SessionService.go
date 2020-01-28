@@ -1,42 +1,37 @@
 package SessionLayer
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
-	"path/filepath"
+	"io/ioutil"
 	"sssh_server/CustomUtils"
 	"sssh_server/Modules/API"
 	"sssh_server/Modules/SSH"
 	"time"
 )
 
-/*
-safe for copy
-underlying types use pointers to data
-*/
-type TerminalSession struct {
-	ID            string
-	SSHSessions   map[string]*SSH.SSHSession    `json:"-"`
-	HandlersMap   map[string]API.SessionHandler `json:"-"`
-	Modules       []API.Module                  `json:"-"`
-	Config        API.SessionConfig             `json:"-"`
-	TimeCreated   int64
-	LastConnected int64
-	Name          string
-}
-
 type SessionService struct {
 	Server            *SSH.SSSHServer
 	Sessions          map[string]*TerminalSession
 	SSHidToTerminalID map[string]string
+	KeyPath           string
+}
+
+type PubKeyShare struct {
+	Key      string
+	Hash     string
+	Mnemonic string
 }
 
 var HISTORY_FILE_NAME = "history"
 
-func Constructor() (s *SessionService) {
+// Creates a new SessionService
+func Constructor(KeyPath string) (s *SessionService) {
 	s = new(SessionService)
 
+	s.KeyPath = KeyPath
 	s.Server = &SSH.SSSHServer{}
 	s.Sessions = make(map[string]*TerminalSession)
 	s.SSHidToTerminalID = make(map[string]string)
@@ -50,11 +45,36 @@ func Constructor() (s *SessionService) {
 	return s
 }
 
+// Return the pubKey associated with KeyPath
+func (s *SessionService) GetPubKey() (*PubKeyShare, error) {
+	key, e := ioutil.ReadFile(s.KeyPath + ".pub")
+	if e != nil {
+		return nil, e
+	}
+	hash, e := SSH.GetKeyHash(key)
+	if e != nil {
+		return nil, e
+	}
+	mnemonic, e := SSH.MakeMnemonic(key)
+	if e != nil {
+		return nil, e
+	}
+
+	pk := PubKeyShare{
+		Key:      string(key),
+		Hash:     base64.RawStdEncoding.EncodeToString(hash),
+		Mnemonic: mnemonic,
+	}
+	return &pk, nil
+}
+
+// Returns the TerminalSession associated with the SSH.SSHSession
 func (s *SessionService) SSHSessionToTerminalSession(sshSession *SSH.SSHSession) *TerminalSession {
 	return s.Sessions[s.SSHidToTerminalID[sshSession.GetSessionID()]]
 }
 
-func (s *SessionService) CreateSession(msgType string, sshSession *SSH.SSHSession, w io.Writer, r io.Reader) {
+// Creates a new session when a client connects
+func (s *SessionService) createSession(msgType string, sshSession *SSH.SSHSession, w io.Writer, r io.Reader) {
 	// TODO: handle the null terminalSession number as a new terminalSession
 	b, _ := CustomUtils.Read(r)
 	sessionID := string(b)
@@ -87,6 +107,7 @@ func (s *SessionService) CreateSession(msgType string, sshSession *SSH.SSHSessio
 	_, _ = w.Write(bytesSession)
 }
 
+// Renames the session
 func (s *SessionService) changeSessionName(name, id string) {
 	s.Sessions[id].Name = name
 }
@@ -98,7 +119,7 @@ func (s *SessionService) ChannelHandler() {
 
 		if msgType == "session" {
 			// On the session message create a new session
-			s.CreateSession(msgType, sshSession, w, r)
+			s.createSession(msgType, sshSession, w, r)
 		} else if msgType == "open.sessions" {
 			// Return all the open sessions for the client to choose
 			var sessions = []*TerminalSession{}
@@ -126,7 +147,9 @@ func (s *SessionService) ChannelHandler() {
 	})
 }
 
+// Serve the server
 func (s *SessionService) Serve() {
+	s.Server.InitServer(s.KeyPath)
 	s.Server.ListenAndServe()
 }
 
@@ -153,70 +176,3 @@ func (ss *SessionService) UpdateVariables(data string, id string) {
 		}
 	}
 }
-
-func (s *TerminalSession) addService(service API.Module) {
-	s.Modules = append(s.Modules, service)
-	handlers := service.GetHandlers()
-	for _, handler := range handlers {
-		s.HandlersMap[handler.Name] = handler.RequestHandler
-	}
-}
-
-// Create a terminal TerminalSession from a ssh session
-func newSession(id string) (s *TerminalSession) {
-	s = new(TerminalSession)
-	s.SSHSessions = make(map[string]*SSH.SSHSession)
-	s.HandlersMap = make(map[string]API.SessionHandler)
-	s.ID = id
-	s.Name = id
-	//s.recentCommandsMutex.Lock()
-	//s.InitTerminal()
-	s.Modules = []API.Module{}
-	s.InitConfig()
-	s.TimeCreated = time.Now().Unix()
-	s.LastConnected = time.Now().Unix()
-
-	addServices(s)
-
-	return s
-}
-
-func (s *TerminalSession) GetID() string {
-	return s.ID
-}
-
-func (s *TerminalSession) GetConfig() API.SessionConfig {
-	return s.Config
-}
-
-func (s *TerminalSession) InitConfig() {
-	s.Config = API.SessionConfig{}
-	s.Config.SessionID = s.ID
-
-	basePath, err := filepath.Abs("Assets/")
-	CustomUtils.CheckPanic(err, "Could not create history file for the session")
-	historyFilePath := fmt.Sprintf("%v/%v", basePath, HISTORY_FILE_NAME+s.ID)
-	s.Config.HistoryFilePath = historyFilePath
-}
-
-func (s *TerminalSession) OnNewSessionLifecycleHook() {
-	// Call lifecycle hooks on the service
-	for _, service := range s.Modules {
-		service.OnNewSession(s)
-	}
-}
-
-func (s *TerminalSession) OnNewConnectionLifecycleHook(sshSession *SSH.SSHSession) {
-	// Call lifecycle hooks on the service
-	for _, service := range s.Modules {
-		service.OnNewConnection(sshSession)
-	}
-}
-
-func addServices(terminalSession *TerminalSession) {
-	for _, service := range Services {
-		terminalSession.addService(service)
-	}
-}
-
-var _ API.TerminalSessionInterface = (*TerminalSession)(nil)

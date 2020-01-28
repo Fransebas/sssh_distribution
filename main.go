@@ -1,32 +1,24 @@
 package main
 
 import (
-	"flag"
+	"encoding/json"
 	"fmt"
 	"github.com/rs/cors"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"sssh_server/CustomUtils"
-	"sssh_server/Modules/CommandExecuter"
+	"sssh_server/Modules/Configuration"
 	"sssh_server/Modules/RPC"
-	"sssh_server/Modules/SSH"
 	"sssh_server/Modules/SessionLayer"
-	"strings"
+	"sssh_server/Programs"
 )
-
-var modePtr = flag.String("mode", "server", `Select a mode for the program, available modes are: 
-	server : running the sssh server
-	prompt : system only function (the user shouldn't use it), it send a request to the server indicating the user typed a command, it should be use it conjunction with userid `)
-var userIdPtr = flag.String("userid", "error", "Send the id of the user should be used with the mode flag set to prompt")
-var historyPtr = flag.String("history", "error", "The history of the bash, should be used with the model flag set to prompt")
-
-var portPtr = flag.Int("port", 2000, "Port for the http server")
-var rpcPortPtr = flag.Int("rpcport", 2001, "Select a port for the rpc (internal process communication)")
 
 var sessionService *SessionLayer.SessionService
 
 var rpc *RPC.RPC
+
+var config Configuration.Configuration
 
 func init() {
 	//recentCommandsSrvc.Socket = Sockets.NewSocketReadWriter()
@@ -61,51 +53,48 @@ func variables(w http.ResponseWriter, r *http.Request) {
 	//rpc.OnCommand(string(b))
 }
 
-//func rpcServer() {
-//	go rpc.Serve()
-//}
+func getPublickKey(w http.ResponseWriter, r *http.Request) {
+	pubKey, e := sessionService.GetPubKey()
+	CustomUtils.CheckPanic(e, "Couldn't read pub key:")
+	pubKeyJson, e := json.Marshal(pubKey)
+	CustomUtils.CheckPanic(e, "Couldn't marshal pub key:")
+	_, _ = w.Write(pubKeyJson)
+}
 
 func server() {
-	SSH.GenerateNewECSDAKey()
 	//r := mux.NewRouter()
 	mux := http.NewServeMux()
-	sessionService = SessionLayer.Constructor()
+	sessionService = SessionLayer.Constructor(config.KeyFile)
 	// needed http
 	mux.HandleFunc("/newcommand", newCommand)
 	mux.HandleFunc("/variables", variables)
+	mux.HandleFunc("/pubKey", getPublickKey)
 
-	log.Printf("Serving at localhost:%v...\n", (*portPtr))
+	log.Printf("Serving at localhost:%v...\n", config.Port)
 	handler := cors.Default().Handler(mux)
 	go sessionService.Serve()
 
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", (*portPtr)), handler))
-}
-
-// I don't like this solution but time will tell
-func updateVariables() {
-	exec := CommandExecuter.CommandExecuter{}
-	data := exec.ExecuteCommand("env")
-	_, e := http.Post(fmt.Sprintf("http://localhost:2000/variables?SSSH_USER=%v", *userIdPtr), "text/html", strings.NewReader(data))
-	CustomUtils.CheckPrint(e)
-}
-
-func prompt() {
-	_, e := http.Post(fmt.Sprintf("http://localhost:2000/newcommand?SSSH_USER=%v", *userIdPtr), "text/html", strings.NewReader(*historyPtr))
-	CustomUtils.CheckPrint(e)
-	updateVariables()
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", config.Port), handler))
 }
 
 func main() {
-	flag.Parse()
-	rpc = RPC.New(*rpcPortPtr)
+	config = Configuration.Configuration{}
+	config.Init()
+
+	rpc = RPC.New(config.RPCPort)
 	for _, service := range SessionLayer.CommandServices {
 		rpc.AddService(service)
 	}
 
-	if *modePtr == "server" {
-		//rpcServer()
+	if config.Mode == "server" {
 		server()
-	} else if *modePtr == "prompt" {
-		prompt()
+	} else if config.Mode == "prompt" {
+		Programs.Prompt(config)
+	} else if config.Mode == "keygen" {
+		Programs.Keygen(config)
+	} else if config.Mode == "fingerprint" {
+		Programs.Fingerprint(config)
+	} else {
+		panic("Invalid Mode " + config.Mode)
 	}
 }

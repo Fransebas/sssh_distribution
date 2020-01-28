@@ -14,7 +14,7 @@ func (cme *CommandExecuter) GetHandlers() []*API.RequestHandler {
 			b, err := CustomUtils.Read(r)
 			CustomUtils.CheckPrint(err)
 			//fmt.Println("exec command: " + string(b))
-			_, _ = w.Write([]byte(cme.ExecuteCommand(string(b))))
+			_, _ = w.Write([]byte(CustomUtils.ExecuteCommand(string(b))))
 		},
 		Name: "exec",
 	}

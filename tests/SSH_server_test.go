@@ -6,9 +6,14 @@ import (
 	"io/ioutil"
 	"log"
 	"net"
+	"runtime"
 	"sssh_server/CustomUtils"
 	"testing"
 )
+
+func TestTest(t *testing.T) {
+	fmt.Println(runtime.GOOS)
+}
 
 func TestGliderBallSSHServer(t *testing.T) {
 
@@ -82,6 +87,9 @@ func TestGoSSHServer(t *testing.T) {
 	if err != nil {
 		log.Fatal("failed to handshake: ", err)
 	}
+
+	// Remove this
+	conn.Close()
 
 	// The incoming Request channel must be serviced.
 	go gossh.DiscardRequests(reqs)
