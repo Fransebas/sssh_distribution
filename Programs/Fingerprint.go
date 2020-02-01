@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"sssh_server/CustomUtils"
 	"sssh_server/Modules/Configuration"
-	"sssh_server/Modules/SSH"
-	"sssh_server/Modules/SessionLayer"
+	"sssh_server/SessionModules/SSH"
+	"sssh_server/SessionModules/SessionLayer"
 )
 
 func print(pubKey SessionLayer.PubKeyShare) {

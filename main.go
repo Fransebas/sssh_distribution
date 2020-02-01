@@ -9,9 +9,9 @@ import (
 	"net/http"
 	"sssh_server/CustomUtils"
 	"sssh_server/Modules/Configuration"
-	"sssh_server/Modules/RPC"
-	"sssh_server/Modules/SessionLayer"
 	"sssh_server/Programs"
+	"sssh_server/SessionModules/RPC"
+	"sssh_server/SessionModules/SessionLayer"
 )
 
 var sessionService *SessionLayer.SessionService

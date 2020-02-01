@@ -1,4 +1,14 @@
+createIfNotExist(){
+    if [ ! -e "$1" ] ; then
+        touch "$1"
+    fi
+}
+
+
 #history -anrw $HIST_FILE_NAME
+
+createIfNotExist ~/.bashrc
+~/.bashrc
 
 # Colors in the terminal
 
@@ -6,13 +16,13 @@ export PS1="\[\033[36m\]\u\[\033[m\]@\[\033[32m\]\h:\[\033[33;1m\]\w\[\033[m\]\$
 export CLICOLOR=1
 export LSCOLORS=ExFxBxDxCxegedabagacad
 alias ls='ls -GFh'
+export TERM=xterm-color
 
 # End Colors
 
 # Set up of history File
-if [ ! -e "$HIST_FILE_NAME" ] ; then
-    touch "$HIST_FILE_NAME"
-fi
+createIfNotExist $HIST_FILE_NAME
+
 
 export HISTFILE=$HIST_FILE_NAME
 export HISTCONTROL=ignorespace ; history -d 1
@@ -30,8 +40,6 @@ curl --data "$(history)" http://localhost:2000/newcommand?SSSH_USER=$SSSH_USER &
 # export PROMPT_COMMAND='curl --data "$(history 1)" http://localhost:2000/newcommand?SSSH_USER=$SSSH_USER &> /dev/null'
 
 export PROMPT_COMMAND='$SSSH -mode=prompt -userid=$SSSH_USER -history="$(history 1)"'
-
-~/.bashrc
 
  cd
 

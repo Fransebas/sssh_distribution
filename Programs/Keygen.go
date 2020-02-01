@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sssh_server/CustomUtils"
 	"sssh_server/Modules/Configuration"
-	"sssh_server/Modules/SSH"
+	"sssh_server/SessionModules/SSH"
 )
 
 func Keygen(config Configuration.Configuration) {

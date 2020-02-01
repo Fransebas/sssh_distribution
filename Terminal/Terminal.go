@@ -9,7 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"sssh_server/CustomUtils"
-	"sssh_server/Modules/SSH"
+	"sssh_server/SessionModules/SSH"
 	"sync"
 )
 
@@ -27,8 +27,8 @@ type Terminal struct {
 	state     *terminal.State
 	resizeMux *sync.Mutex
 	user      *SSH.User
-	tmp       *os.File
-	buffer    *CustomUtils.FixedDeque
+	//tmp       *os.File
+	buffer *CustomUtils.FixedDeque
 	//srw *io.ReadWriter
 }
 
@@ -45,7 +45,7 @@ func (t *Terminal) GetBuffer() []byte {
 }
 
 // Constructor
-func InitTerminal(id string, historyPath string) *Terminal {
+func InitTerminal(id string, historyPath string, username string) *Terminal {
 	var t Terminal
 
 	t.buffer = CustomUtils.New(1000000) /// 1000000 is 1 MB maybe I should use less
@@ -53,7 +53,7 @@ func InitTerminal(id string, historyPath string) *Terminal {
 
 	// debug
 	var err error
-	t.tmp, err = os.Create("tmp2")
+	//t.tmp, err = os.Create("tmp2")
 	if err != nil {
 		panic(err)
 	}
@@ -64,7 +64,7 @@ func InitTerminal(id string, historyPath string) *Terminal {
 	//CustomUtils.CheckPanic(err, "Could not create history file for the session")
 	//t.HistoryFilePath = fmt.Sprintf("%v/%v", basePath, FILE_NAME)
 
-	t.ptmx = initInteractive(id, historyPath)
+	t.ptmx = initInteractive(id, historyPath, username)
 	return &t
 }
 
@@ -87,7 +87,7 @@ func (t *Terminal) read() {
 	for i := 0; i < n; i++ {
 		t.buffer.Insert(b[i])
 	}
-	t.tmp.Write(b)
+	//t.tmp.Write(b)
 }
 
 /*
@@ -149,7 +149,7 @@ func (t *Terminal) Close() {
 // Creates and interactive bash session based on the ID and the file to use as history file, here we add the file to run for the initialization,
 // i.e. we change the bashrc for our own version that by itself call the user bashrc
 // the init file can be found in `/sssh_server/Assets/bashrc` *this should change to a local directory*
-func initInteractive(ID string, historyPath string) *os.File {
+func initInteractive(ID, historyPath, username string) *os.File {
 	// Handle pty size.
 	basePath, err := filepath.Abs("Assets/")
 	fmt.Printf("basePath = %v \n", basePath)
@@ -160,7 +160,11 @@ func initInteractive(ID string, historyPath string) *os.File {
 	// Send the initialization file the variables it's going to use
 	// TODO: fix the absolute path thingy
 	_ = os.Setenv("SYMBIONT", "~/go/src/symbiont/main.go")
-	bash := fmt.Sprintf("export SSSH=%v; export SSSH_USER=%v; export HIST_FILE_NAME=%v; bash --rcfile %s -i ", "~/go/src/sssh_server/sssh_server", ID, historyPath, path)
+	initCommand := `export SSSH=%v; export SSSH_USER=%v; export HIST_FILE_NAME=%v; bash --rcfile %s -i`
+	userBash := fmt.Sprintf(`sudo -H -u %v bash -c "%v"`, username, initCommand)
+	//-c "login -p -f fransebas"
+	bash := fmt.Sprintf(userBash, "~/go/src/sssh_server/sssh_server", ID, historyPath, path)
+	//bash := fmt.Sprintf(`export SSSH=%v; export SSSH_USER=%v; export HIST_FILE_NAME=%v; bash --rcfile %s -c "login fransebas"`, "~/go/src/sssh_server/sssh_server", ID, historyPath, path)
 	c := exec.Command("bash", "-c", bash)
 
 	//c := exec.Command("bash", "--rcfile", path, "-i")
