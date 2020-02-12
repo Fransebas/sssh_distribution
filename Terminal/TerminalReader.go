@@ -10,7 +10,7 @@ import (
 // and the TerminalReader remembers where each client is currently reading from
 type TerminalReader struct {
 	buffer   *CustomUtils.FixedDeque
-	offset   int
+	offset   int // current reading point
 	terminal *Terminal
 }
 
@@ -28,10 +28,12 @@ func (tr *TerminalReader) Read(p []byte) (n int, err error) {
 	return tr.BufferRead(p)
 }
 
+// Read the following bytes, from tr.offset to end and update offset
 func (tr *TerminalReader) BufferRead(p []byte) (n int, err error) {
-	b := tr.buffer.BytesFrom(tr.offset)
+
+	var b []byte
+	b, tr.offset = tr.buffer.BytesFrom(tr.offset)
 	n = min(len(p), len(b))
-	tr.offset += n
 	for i := 0; i < n; i++ {
 		p[i] = b[i]
 	}

@@ -21,7 +21,7 @@ func New(size int) *FixedDeque {
 }
 
 func (f *FixedDeque) Insert(i interface{}) {
-	if f.Len()-1 > f.maxSize {
+	if f.Len() > f.maxSize {
 		f.PopBack()
 	}
 	f.PushFront(i)

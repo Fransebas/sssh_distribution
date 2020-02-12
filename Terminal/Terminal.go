@@ -70,6 +70,7 @@ func InitTerminal(id string, historyPath string, username string) *Terminal {
 
 // Write data into the terminal/bash
 func (t *Terminal) Write(b []byte) (int, error) {
+	//fmt.Println("command received")
 	return t.ptmx.Write(b)
 }
 
@@ -158,12 +159,10 @@ func initInteractive(ID, historyPath, username string) *os.File {
 	fmt.Println("path " + path)
 
 	// Send the initialization file the variables it's going to use
-	// TODO: fix the absolute path thingy
-	_ = os.Setenv("SYMBIONT", "~/go/src/symbiont/main.go")
 	initCommand := `export SSSH=%v; export SSSH_USER=%v; export HIST_FILE_NAME=%v; bash --rcfile %s -i`
 	userBash := fmt.Sprintf(`sudo -H -u %v bash -c "%v"`, username, initCommand)
 	//-c "login -p -f fransebas"
-	bash := fmt.Sprintf(userBash, "~/go/src/sssh_server/sssh_server", ID, historyPath, path)
+	bash := fmt.Sprintf(userBash, "sssh_server", ID, historyPath, path)
 	//bash := fmt.Sprintf(`export SSSH=%v; export SSSH_USER=%v; export HIST_FILE_NAME=%v; bash --rcfile %s -c "login fransebas"`, "~/go/src/sssh_server/sssh_server", ID, historyPath, path)
 	c := exec.Command("bash", "-c", bash)
 

@@ -13,7 +13,25 @@ func TestFixedDequeInsert(t *testing.T) {
 	}
 	for i = 90; i < 120; i++ {
 		q.Insert(i)
-		fmt.Printf("begining %v \n", q.Back())
+		fmt.Printf("begining %v and last %v \n", q.Back(), q.Front())
+
+	}
+}
+
+func TestTerminalSim(t *testing.T) {
+	var offset = 0
+	q := New(10)
+	frase := "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	var i = 0
+	for i = 0; i < 10; i++ {
+		q.Insert(frase[i])
+	}
+	for i = 10; i < 25; i++ {
+		var b []byte
+		b, offset = q.BytesFrom(offset)
+		q.Insert(frase[i])
+		//t.Log()
+		fmt.Printf("b %v offset %v \n", string(b), offset)
 	}
 }
 

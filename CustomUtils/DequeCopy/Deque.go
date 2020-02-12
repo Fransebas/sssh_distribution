@@ -6,6 +6,7 @@ package DequeCopy
 import (
 	"bytes"
 	"fmt"
+	"github.com/adam-lavrik/go-imath/ix"
 )
 
 // Copyright (c) 2013-2017, Peter H. Froehlich. All rights reserved.
@@ -23,10 +24,11 @@ type Queue struct {
 	// PushBack writes to rep[back] then increments back; PushFront
 	// decrements front then writes to rep[front]; len(rep) is a power
 	// of two; unused slots are nil and not garbage.
-	rep    []interface{}
-	front  int
-	back   int
-	length int
+	rep     []interface{}
+	front   int
+	back    int
+	length  int
+	inserts int
 }
 
 // New returns an initialized empty queue.
@@ -134,8 +136,12 @@ func (q *Queue) Bytes() []byte {
 	return b
 }
 
-// Return the bytes form k place to finish
-func (q *Queue) BytesFrom(k int) []byte {
+// Return the bytes form k place to finish and the total number of reads
+func (q *Queue) BytesFrom(p int) ([]byte, int) {
+
+	a := ix.Min(q.inserts-p, q.length)
+	k := q.length - a
+
 	b := []byte{}
 	j := q.back
 	j = q.dec(j)
@@ -148,7 +154,7 @@ func (q *Queue) BytesFrom(k int) []byte {
 		}
 		j = q.dec(j)
 	}
-	return b
+	return b, q.inserts
 }
 
 // inc returns the next integer position wrapping around queue q.
@@ -180,6 +186,7 @@ func (q *Queue) PushFront(v interface{}) {
 	q.front = q.dec(q.front)
 	q.rep[q.front] = v
 	q.length++
+	q.inserts++
 }
 
 // PushBack inserts a new value v at the back of queue q.
@@ -189,6 +196,7 @@ func (q *Queue) PushBack(v interface{}) {
 	q.rep[q.back] = v
 	q.back = q.inc(q.back)
 	q.length++
+	q.inserts++
 }
 
 // PopFront removes and returns the first element of queue q or nil.
