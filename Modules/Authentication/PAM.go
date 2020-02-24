@@ -12,6 +12,7 @@ PAM documentation
 
 package Authentication
 
+//#cgo LDFLAGS: -lpam
 /*
 #include <stdlib.h>
 */
