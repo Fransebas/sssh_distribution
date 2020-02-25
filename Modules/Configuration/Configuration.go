@@ -16,8 +16,8 @@ var historyPtr = flag.String("history", "error", "The history of the bash, shoul
 // END: Internal use flags
 
 // SSSH server
-var httPortPtr = flag.Int("port", 2000, "HTTPPort for the http server")
-var portPtr = flag.Int("ssshport", 2233, "HTTPPort for the sssh server, default 2222")
+var httPortPtr = flag.Int("httpport", 2000, "HTTPPort for the http server")
+var portPtr = flag.Int("port", 2233, "HTTPPort for the sssh server, default 2222")
 var rpcPortPtr = flag.Int("rpcport", 2001, "Select a port for the rpc (internal process communication)")
 var keyFile = flag.String("keyfile", "id_rsa", "If this flag is set, this key will be used to authenticate the host")
 
