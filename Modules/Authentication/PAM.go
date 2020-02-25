@@ -20,7 +20,9 @@ import "C"
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/vvanpo/golang-pam"
+	"github.com/Fransebas/golang-pam"
+
+	//"github.com/vvanpo/golang-pam"
 	"sssh_server/CustomUtils"
 	"strconv"
 	"strings"
