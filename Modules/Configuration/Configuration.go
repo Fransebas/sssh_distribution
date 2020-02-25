@@ -16,7 +16,8 @@ var historyPtr = flag.String("history", "error", "The history of the bash, shoul
 // END: Internal use flags
 
 // SSSH server
-var portPtr = flag.Int("port", 2000, "Port for the http server")
+var httPortPtr = flag.Int("port", 2000, "HTTPPort for the http server")
+var portPtr = flag.Int("ssshport", 2222, "HTTPPort for the sssh server, default 2222")
 var rpcPortPtr = flag.Int("rpcport", 2001, "Select a port for the rpc (internal process communication)")
 var keyFile = flag.String("keyfile", "id_rsa", "If this flag is set, this key will be used to authenticate the host")
 
@@ -55,6 +56,7 @@ type Configuration struct {
 	Mode              string
 	UserId            string
 	History           string
+	HTTPPort          int
 	Port              int
 	RPCPort           int
 	KeyFile           string
@@ -79,10 +81,10 @@ func (c *Configuration) Init() {
 	c.Mode = *modePtr
 	c.UserId = *userIdPtr
 	c.History = *historyPtr
-	c.Port = *portPtr
+	c.HTTPPort = *httPortPtr
 	c.RPCPort = *rpcPortPtr
 	c.KeyFile = *keyFile
-
+	c.Port = *portPtr
 	c.initKeygen()
 	c.initFingerprint()
 }

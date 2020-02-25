@@ -28,6 +28,7 @@ type SSSHServer struct {
 	authorizedKeysMap map[string]bool
 	KeyPath           string // Path for the host key i.e. /etc/ssh/id_rsa or a custom path
 	hasBeenInit       bool
+	port              int
 }
 
 type SSHSession struct {
@@ -126,7 +127,8 @@ func (server *SSSHServer) initAuthCallbacks() {
 	}
 }
 
-func (server *SSSHServer) InitServer(KeyPath string) {
+func (server *SSSHServer) InitServer(KeyPath string, port int) {
+	server.port = port
 	server.hasBeenInit = true
 	server.ReadAuthorizedKeys(AUTHORIZED_KEYS_FILE)
 	if server.handlers == nil {
@@ -148,7 +150,7 @@ func (server *SSSHServer) ListenAndServe() {
 func (server *SSSHServer) serve() {
 	// Once a ServerConfig has been configured, connections can be
 	// accepted.
-	listener, err := net.Listen("tcp", "localhost:2222")
+	listener, err := net.Listen("tcp", fmt.Sprintf("%v:%v", "127.0.0.1", server.port))
 	if err != nil {
 		log.Fatal("failed to listen for connection: ", err)
 	}

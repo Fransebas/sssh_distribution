@@ -23,6 +23,7 @@ type SessionService struct {
 	Sessions          map[string]*TerminalSession
 	SSHidToTerminalID map[string]string
 	KeyPath           string
+	port              int
 }
 
 type PubKeyShare struct {
@@ -34,9 +35,10 @@ type PubKeyShare struct {
 var HISTORY_FILE_NAME = "history"
 
 // Creates a new SessionService
-func Constructor(KeyPath string) (s *SessionService) {
+func Constructor(KeyPath string, port int) (s *SessionService) {
 	s = new(SessionService)
 
+	s.port = port
 	s.KeyPath = KeyPath
 	s.Server = &SSH.SSSHServer{}
 	s.Sessions = make(map[string]*TerminalSession)
@@ -155,7 +157,7 @@ func (s *SessionService) ChannelHandler() {
 
 // Serve the server
 func (s *SessionService) Serve() {
-	s.Server.InitServer(s.KeyPath)
+	s.Server.InitServer(s.KeyPath, s.port)
 	s.Server.ListenAndServe()
 }
 

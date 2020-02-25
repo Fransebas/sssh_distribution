@@ -61,20 +61,20 @@ func getPublickKey(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(pubKeyJson)
 }
 
-func server() {
+func server(config Configuration.Configuration) {
 	//r := mux.NewRouter()
 	mux := http.NewServeMux()
-	sessionService = SessionLayer.Constructor(config.KeyFile)
+	sessionService = SessionLayer.Constructor(config.KeyFile, config.Port)
 	// needed http
 	mux.HandleFunc("/newcommand", newCommand)
 	mux.HandleFunc("/variables", variables)
 	mux.HandleFunc("/pubKey", getPublickKey)
 
-	log.Printf("Serving at localhost:%v...\n", config.Port)
+	log.Printf("Serving at localhost:%v...\n", config.HTTPPort)
 	handler := cors.Default().Handler(mux)
 	go sessionService.Serve()
 
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", config.Port), handler))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", config.HTTPPort), handler))
 }
 
 func main() {
@@ -87,7 +87,7 @@ func main() {
 	}
 
 	if config.Mode == "server" {
-		server()
+		server(config)
 	} else if config.Mode == "prompt" {
 		Programs.Prompt(config)
 	} else if config.Mode == "keygen" {
