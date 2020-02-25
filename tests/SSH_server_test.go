@@ -72,7 +72,7 @@ func TestGoSSHServer(t *testing.T) {
 
 	// Once a ServerConfig has been configured, connections can be
 	// accepted.
-	listener, err := net.Listen("tcp", "0.0.0.0:2222")
+	listener, err := net.Listen("tcp", "0.0.0.0:2223")
 	if err != nil {
 		log.Fatal("failed to listen for connection: ", err)
 	}
