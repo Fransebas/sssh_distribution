@@ -1,9 +1,9 @@
 package TerminalService
 
 import (
+	"sssh_server/Modules/Terminal"
 	"sssh_server/SessionModules/API"
 	"sssh_server/SessionModules/SSH"
-	"sssh_server/Terminal"
 )
 
 type TerminalService struct {

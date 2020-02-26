@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/creack/pty"
 	"golang.org/x/crypto/ssh/terminal"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -157,6 +158,14 @@ func initInteractive(ID, historyPath, username string) *os.File {
 	relativePath := fmt.Sprintf("%v/bashrc", basePath)
 	path := relativePath
 	fmt.Println("path " + path)
+
+	userBashContent, e := ioutil.ReadFile(path)
+
+	if e != nil {
+		CustomUtils.CheckPrint(e)
+	}
+
+	userBashContent, e := ioutil.ReadFile(path)
 
 	// Send the initialization file the variables it's going to use
 	initCommand := `export SSSH=%v; export SSSH_USER=%v; export HIST_FILE_NAME=%v; bash --rcfile %s -i`
