@@ -30,6 +30,11 @@ type SSSHServer struct {
 	port              int
 }
 
+type User struct {
+	// Later I have to add here the keys
+	ID string
+}
+
 type SSHSession struct {
 	ssh.Channel
 	Conn     *ssh.ServerConn
@@ -208,7 +213,6 @@ func (server *SSSHServer) serve() {
 
 func (server *SSSHServer) AcceptRequests(in <-chan *ssh.Request, channel *ssh.Channel, session *SSHSession) {
 	for req := range in {
-		fmt.Printf("Channel type %v \n", req.Type)
 		switch req.Type {
 		case "subsystem":
 			// handle ftp here
@@ -255,25 +259,9 @@ func (server *SSSHServer) handleChannel(channel *ssh.Channel, session *SSHSessio
 
 	// msgType := ReadChannel(channel)
 
-	// TODO: deal with err
-	// _, _ = (*channel).Write([]byte("ack")) // Send the string ack signaling that the other side can start sending and receiving
-
-	//f := server.handlers[msgType]
-
 	// I wonder if this will copy something by passing the value rather than the pointer, but Go wont let me pass the pointer as a io.Writer/Reader ...
 	// bitch
-
-	//limitlessChannel := LimitlessChannel.LimitlessChannel{
-	//	Writer: *channel,
-	//}
-
 	server.AnyHandler(msgType, session, *channel, *channel)
-	//if f != nil {
-	//	f(session, limitlessChannel, *channel)
-	//} else {
-	//	fmt.Println("No handler for this message " + msgType)
-	//}
-
 }
 
 func ReadChannel(channel *ssh.Channel) string {

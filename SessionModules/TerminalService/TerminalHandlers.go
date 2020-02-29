@@ -2,6 +2,7 @@ package TerminalService
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/creack/pty"
 
 	"io"
@@ -9,9 +10,12 @@ import (
 	"sssh_server/SessionModules/API"
 )
 
+var c = 0
+
 func (ts *TerminalService) GetHandlers() []*API.RequestHandler {
 	terminalConnection := API.RequestHandler{
 		RequestHandler: func(w io.Writer, r io.Reader) {
+			c++
 			// On terminal connection opened
 			// Simple redirect the channels
 
@@ -26,7 +30,8 @@ func (ts *TerminalService) GetHandlers() []*API.RequestHandler {
 			// says that Copy stops when the src returns EOF but not when the
 			// writer hence this should stop in only half of the cases
 			go func() {
-				_, _ = io.Copy(ts.Terminal, r)
+				_, e := io.Copy(ts.Terminal, r)
+				fmt.Printf("Connection Lost %v", e)
 			}()
 
 			b := make([]byte, 1024*8)
@@ -35,15 +40,21 @@ func (ts *TerminalService) GetHandlers() []*API.RequestHandler {
 
 			CustomUtils.CheckPrint(e)
 
-			buf := make([]byte, 3*1024)
-			for {
-				nr, _ := reader.Read(buf)
-				if nr > 0 {
-					_, _ = w.Write(buf[0:nr])
-				}
-			}
+			//buf := make([]byte, 3*1024)
+			//for {
+			//	nr, e := reader.Read(buf)
+			//	fmt.Printf("w %v \n", c)
+			//	if e != nil {
+			//		fmt.Println("Connection Lost")
+			//		break;
+			//	}
+			//	if nr > 0 {
+			//		_, _ = w.Write(buf[0:nr])
+			//	}
+			//}
 
-			//_, _ = io.Copy(w, &reader)
+			_, e = io.Copy(w, &reader)
+			fmt.Printf("Connection Lost %v", e)
 		},
 		Name: "terminal",
 	}

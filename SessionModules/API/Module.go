@@ -2,7 +2,7 @@ package API
 
 import (
 	"io"
-	"sssh_server/SessionModules/SSH"
+	"sssh_server/Modules/SSH"
 )
 
 type SessionHandler func(w io.Writer, r io.Reader)

@@ -6,9 +6,9 @@ import (
 	"os/exec"
 	"path/filepath"
 	"sssh_server/CustomUtils"
+	"sssh_server/Modules/SSH"
 	"sssh_server/SessionModules/API"
 	"sssh_server/SessionModules/RecentCommands/Models"
-	"sssh_server/SessionModules/SSH"
 	"strings"
 )
 

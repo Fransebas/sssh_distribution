@@ -3,8 +3,8 @@ package GlobalVariables
 import (
 	"encoding/json"
 	"os"
+	"sssh_server/Modules/SSH"
 	"sssh_server/SessionModules/API"
-	"sssh_server/SessionModules/SSH"
 	"strings"
 )
 

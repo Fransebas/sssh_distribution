@@ -12,7 +12,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"sssh_server/CustomUtils"
-	"sssh_server/SessionModules/SSH"
+	"sssh_server/Modules/SSH"
 	"sync"
 )
 
@@ -25,14 +25,15 @@ Holds all the important things that make up a terminal
 Safe for copy, all types are pointers
 */
 type Terminal struct {
-	ptmx      *os.File
-	ch        *chan os.Signal
-	state     *terminal.State
-	resizeMux *sync.Mutex
-	user      *SSH.User
-	buffer    *CustomUtils.FixedDeque
-	reader    io.Reader
-	writer    io.Writer
+	ptmx       *os.File
+	ch         *chan os.Signal
+	state      *terminal.State
+	resizeMux  *sync.Mutex
+	user       *SSH.User
+	buffer     *CustomUtils.FixedDeque
+	reader     io.Reader
+	writer     io.Writer
+	readingMut *sync.Mutex
 	//tmp       *os.File
 	//srw *io.ReadWriter
 }
@@ -42,6 +43,7 @@ func (t *Terminal) GetReader() TerminalReader {
 	tr.buffer = t.buffer
 	tr.offset = 0
 	tr.terminal = t
+	tr.terminalBuffer = make([]byte, 32*1024)
 	return tr
 }
 
@@ -55,6 +57,7 @@ func InitTerminal(id string, historyPath string, username string) *Terminal {
 
 	t.buffer = CustomUtils.New(1000000) /// 1000000 is 1 MB maybe I should use less
 	t.resizeMux = new(sync.Mutex)
+	t.readingMut = new(sync.Mutex)
 
 	// debug
 	var err error
@@ -91,14 +94,14 @@ func (t *Terminal) Read(b []byte) (int, error) {
 	return n, e
 }
 
-var buf = make([]byte, 32*1024)
-
-func (t *Terminal) read() {
+func (t *Terminal) read(buf []byte) {
 	//b := make([]byte, 32*1024)
+	//t.readingMut.Lock()
 	n, _ := t.reader.Read(buf)
 	for i := 0; i < n; i++ {
 		t.buffer.Insert(buf[i])
 	}
+	//t.readingMut.Unlock()
 }
 
 /*

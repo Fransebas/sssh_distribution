@@ -9,11 +9,6 @@ import (
 	"io"
 )
 
-type User struct {
-	// Later I have to add here the keys
-	ID string
-}
-
 func ProofClaims(key []byte) error {
 	return nil
 }
