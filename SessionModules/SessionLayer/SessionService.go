@@ -10,8 +10,10 @@ import (
 	"io"
 	"io/ioutil"
 	"sssh_server/CustomUtils"
+	"sssh_server/Modules/SSH"
+	"sssh_server/Modules/SSH/LimitlessChannel"
 	"sssh_server/SessionModules/API"
-	"sssh_server/SessionModules/SSH"
+	"strings"
 	"time"
 )
 
@@ -122,12 +124,19 @@ func (s *SessionService) changeSessionName(name, id string) {
 
 // Make the mapping for any kind of messages
 // Here is where the multiplexing of channels happen
+// Also if it's of type request, it will be passed through the limitless channel
+// because by default each message has a default size but with this, you can send message the size you wanted to
 func (s *SessionService) ChannelHandler() {
-	s.Server.SetAnyHandler(func(msgType string, sshSession *SSH.SSHSession, w io.Writer, r io.Reader) {
-
+	s.Server.SetAnyHandler(func(fullMsgType string, sshSession *SSH.SSHSession, w io.Writer, r io.Reader) {
+		parts := strings.Split(fullMsgType, "&")
+		mode := parts[0]
+		msgType := parts[1]
+		limitlessChannel := LimitlessChannel.LimitlessChannel{
+			Writer: w,
+		}
 		if msgType == "session" {
 			// On the session message create a new session
-			s.createSession(msgType, sshSession, w, r)
+			s.createSession(msgType, sshSession, limitlessChannel, r)
 		} else if msgType == "open.sessions" {
 			// Return all the open sessions for the client to choose
 			var sessions = []*TerminalSession{}
@@ -136,7 +145,7 @@ func (s *SessionService) ChannelHandler() {
 			}
 			b, e := json.Marshal(sessions)
 			CustomUtils.CheckPanic(e, "Unable to parse sessions, this should never happen")
-			_, e = w.Write(b)
+			_, e = limitlessChannel.Write(b)
 			CustomUtils.CheckPrint(e)
 		} else if msgType == "session.name" {
 			b, _ := CustomUtils.Read(r)
@@ -146,10 +155,21 @@ func (s *SessionService) ChannelHandler() {
 
 		} else {
 			terminalSession := s.SSHSessionToTerminalSession(sshSession)
-			if handler, ok := terminalSession.HandlersMap[msgType]; ok {
-				handler(w, r)
-			} else {
-				CustomUtils.CheckPrint(fmt.Errorf("Message type " + msgType + " doesn't exist"))
+
+			if mode == "request" {
+
+				if handler, ok := terminalSession.HandlersMap[msgType]; ok {
+					handler(limitlessChannel, r)
+				} else {
+					CustomUtils.CheckPrint(fmt.Errorf("Message type " + msgType + " doesn't exist"))
+				}
+			} else if mode == "channel" {
+
+				if handler, ok := terminalSession.HandlersMap[msgType]; ok {
+					handler(w, r)
+				} else {
+					CustomUtils.CheckPrint(fmt.Errorf("Message type " + msgType + " doesn't exist"))
+				}
 			}
 		}
 	})

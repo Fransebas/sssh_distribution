@@ -9,9 +9,10 @@ import (
 // Basically every client should have a TerminalReader which will read from a shared buffer
 // and the TerminalReader remembers where each client is currently reading from
 type TerminalReader struct {
-	buffer   *CustomUtils.FixedDeque
-	offset   int // current reading point
-	terminal *Terminal
+	buffer         *CustomUtils.FixedDeque
+	offset         int // current reading point
+	terminal       *Terminal
+	terminalBuffer []byte // buffer for reading for terminal, it's an auxiliar
 }
 
 func min(a, b int) int {
@@ -24,8 +25,11 @@ func min(a, b int) int {
 // Read that makes TerminalReader implements the interface of io.Reader
 func (tr *TerminalReader) Read(p []byte) (n int, err error) {
 	// Update the buffer if necesary
-	tr.terminal.read()
-	return tr.BufferRead(p)
+	tr.terminal.read(tr.terminalBuffer)
+
+	n, err = tr.BufferRead(p)
+	//CustomUtils.LogTime(string(p[:n]), "buffer read / send")
+	return
 }
 
 // Read the following bytes, from tr.offset to end and update offset

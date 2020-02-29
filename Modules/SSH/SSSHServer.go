@@ -13,7 +13,6 @@ import (
 	"os"
 	"sssh_server/CustomUtils"
 	"sssh_server/Modules/Authentication"
-	"sssh_server/SessionModules/SSH/LimitlessChannel"
 	"strings"
 )
 
@@ -29,6 +28,11 @@ type SSSHServer struct {
 	KeyPath           string // Path for the host key i.e. /etc/ssh/id_rsa or a custom path
 	hasBeenInit       bool
 	port              int
+}
+
+type User struct {
+	// Later I have to add here the keys
+	ID string
 }
 
 type SSHSession struct {
@@ -255,24 +259,9 @@ func (server *SSSHServer) handleChannel(channel *ssh.Channel, session *SSHSessio
 
 	// msgType := ReadChannel(channel)
 
-	// TODO: deal with err
-	// _, _ = (*channel).Write([]byte("ack")) // Send the string ack signaling that the other side can start sending and receiving
-
-	//f := server.handlers[msgType]
-
 	// I wonder if this will copy something by passing the value rather than the pointer, but Go wont let me pass the pointer as a io.Writer/Reader ...
 	// bitch
-	limitlessChannel := LimitlessChannel.LimitlessChannel{
-		Writer: *channel,
-	}
-
-	server.AnyHandler(msgType, session, limitlessChannel, *channel)
-	//if f != nil {
-	//	f(session, limitlessChannel, *channel)
-	//} else {
-	//	fmt.Println("No handler for this message " + msgType)
-	//}
-
+	server.AnyHandler(msgType, session, *channel, *channel)
 }
 
 func ReadChannel(channel *ssh.Channel) string {

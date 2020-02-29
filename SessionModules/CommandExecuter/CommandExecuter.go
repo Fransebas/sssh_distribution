@@ -3,8 +3,8 @@ package CommandExecuter
 import (
 	"os/exec"
 	"sssh_server/CustomUtils"
+	"sssh_server/Modules/SSH"
 	"sssh_server/SessionModules/API"
-	"sssh_server/SessionModules/SSH"
 )
 
 type CommandExecuter struct {
