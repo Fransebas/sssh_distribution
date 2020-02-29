@@ -25,15 +25,14 @@ Holds all the important things that make up a terminal
 Safe for copy, all types are pointers
 */
 type Terminal struct {
-	ptmx       *os.File
-	ch         *chan os.Signal
-	state      *terminal.State
-	resizeMux  *sync.Mutex
-	user       *SSH.User
-	buffer     *CustomUtils.FixedDeque
-	reader     io.Reader
-	writer     io.Writer
-	readingMut *sync.Mutex
+	ptmx      *os.File
+	ch        *chan os.Signal
+	state     *terminal.State
+	resizeMux *sync.Mutex
+	user      *SSH.User
+	buffer    *CustomUtils.FixedDeque
+	reader    io.Reader
+	writer    io.Writer
 	//tmp       *os.File
 	//srw *io.ReadWriter
 }
@@ -57,7 +56,6 @@ func InitTerminal(id string, historyPath string, username string) *Terminal {
 
 	t.buffer = CustomUtils.New(1000000) /// 1000000 is 1 MB maybe I should use less
 	t.resizeMux = new(sync.Mutex)
-	t.readingMut = new(sync.Mutex)
 
 	// debug
 	var err error
