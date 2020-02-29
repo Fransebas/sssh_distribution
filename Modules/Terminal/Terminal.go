@@ -143,7 +143,6 @@ func (t *Terminal) SetSizeVals(X, Y, COLS, ROWS uint16) {
 }
 
 func (t *Terminal) SetSize(winSize *pty.Winsize) {
-	fmt.Printf("Resizing Terminal")
 	t.resizeMux.Lock()
 	defer t.resizeMux.Unlock()
 	if err := pty.Setsize(t.ptmx, winSize); err != nil {

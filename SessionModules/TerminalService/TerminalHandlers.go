@@ -2,12 +2,11 @@ package TerminalService
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/creack/pty"
+
 	"io"
 	"sssh_server/CustomUtils"
 	"sssh_server/SessionModules/API"
-	"time"
 )
 
 func (ts *TerminalService) GetHandlers() []*API.RequestHandler {
@@ -38,14 +37,9 @@ func (ts *TerminalService) GetHandlers() []*API.RequestHandler {
 
 			buf := make([]byte, 3*1024)
 			for {
-				CustomUtils.LogTime("a", "go.before.r")
 				nr, _ := reader.Read(buf)
-				time.Sleep(100 * time.Millisecond)
-				CustomUtils.LogTime("a", "go.after.r")
 				if nr > 0 {
-					fmt.Printf("data %v\n", string(buf[0:nr]))
 					_, _ = w.Write(buf[0:nr])
-					CustomUtils.LogTime("a", "go.after.w")
 				}
 			}
 
@@ -57,10 +51,14 @@ func (ts *TerminalService) GetHandlers() []*API.RequestHandler {
 	terminalResize := API.RequestHandler{
 		RequestHandler: func(w io.Writer, r io.Reader) {
 			// On terminal connection opened
+
 			var resize pty.Winsize
 			b, err := CustomUtils.Read(r)
 			err = json.Unmarshal(b, &resize)
-			if err != nil {
+
+			CustomUtils.CheckPrint(err)
+
+			if err == nil {
 				ts.Terminal.SetSize(&resize)
 			}
 		},
