@@ -13,7 +13,6 @@ import (
 	"os"
 	"sssh_server/CustomUtils"
 	"sssh_server/Modules/Authentication"
-	"sssh_server/SessionModules/SSH/LimitlessChannel"
 	"strings"
 )
 
@@ -209,6 +208,7 @@ func (server *SSSHServer) serve() {
 
 func (server *SSSHServer) AcceptRequests(in <-chan *ssh.Request, channel *ssh.Channel, session *SSHSession) {
 	for req := range in {
+		fmt.Printf("Channel type %v \n", req.Type)
 		switch req.Type {
 		case "subsystem":
 			// handle ftp here
@@ -262,11 +262,12 @@ func (server *SSSHServer) handleChannel(channel *ssh.Channel, session *SSHSessio
 
 	// I wonder if this will copy something by passing the value rather than the pointer, but Go wont let me pass the pointer as a io.Writer/Reader ...
 	// bitch
-	limitlessChannel := LimitlessChannel.LimitlessChannel{
-		Writer: *channel,
-	}
 
-	server.AnyHandler(msgType, session, limitlessChannel, *channel)
+	//limitlessChannel := LimitlessChannel.LimitlessChannel{
+	//	Writer: *channel,
+	//}
+
+	server.AnyHandler(msgType, session, *channel, *channel)
 	//if f != nil {
 	//	f(session, limitlessChannel, *channel)
 	//} else {

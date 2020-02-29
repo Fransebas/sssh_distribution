@@ -2,10 +2,12 @@ package TerminalService
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/creack/pty"
 	"io"
 	"sssh_server/CustomUtils"
 	"sssh_server/SessionModules/API"
+	"time"
 )
 
 func (ts *TerminalService) GetHandlers() []*API.RequestHandler {
@@ -24,7 +26,9 @@ func (ts *TerminalService) GetHandlers() []*API.RequestHandler {
 			// the documentation here https://golang.org/pkg/io/#Copy
 			// says that Copy stops when the src returns EOF but not when the
 			// writer hence this should stop in only half of the cases
-			go func() { _, _ = io.Copy(ts.Terminal, r) }()
+			go func() {
+				_, _ = io.Copy(ts.Terminal, r)
+			}()
 
 			b := make([]byte, 1024*8)
 			n, _ := reader.BufferRead(b)
@@ -32,7 +36,20 @@ func (ts *TerminalService) GetHandlers() []*API.RequestHandler {
 
 			CustomUtils.CheckPrint(e)
 
-			_, _ = io.Copy(w, &reader)
+			buf := make([]byte, 3*1024)
+			for {
+				CustomUtils.LogTime("a", "go.before.r")
+				nr, _ := reader.Read(buf)
+				time.Sleep(100 * time.Millisecond)
+				CustomUtils.LogTime("a", "go.after.r")
+				if nr > 0 {
+					fmt.Printf("data %v\n", string(buf[0:nr]))
+					_, _ = w.Write(buf[0:nr])
+					CustomUtils.LogTime("a", "go.after.w")
+				}
+			}
+
+			//_, _ = io.Copy(w, &reader)
 		},
 		Name: "terminal",
 	}

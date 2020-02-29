@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"github.com/creack/pty"
 	"golang.org/x/crypto/ssh/terminal"
+	"io"
 	"log"
+
+	//"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -27,8 +30,10 @@ type Terminal struct {
 	state     *terminal.State
 	resizeMux *sync.Mutex
 	user      *SSH.User
+	buffer    *CustomUtils.FixedDeque
+	reader    io.Reader
+	writer    io.Writer
 	//tmp       *os.File
-	buffer *CustomUtils.FixedDeque
 	//srw *io.ReadWriter
 }
 
@@ -64,31 +69,36 @@ func InitTerminal(id string, historyPath string, username string) *Terminal {
 	//CustomUtils.CheckPanic(err, "Could not create history file for the session")
 	//t.HistoryFilePath = fmt.Sprintf("%v/%v", basePath, FILE_NAME)
 
-	t.ptmx = initInteractive(id, historyPath, username)
+	t.ptmx, t.reader, t.writer = initInteractive(id, historyPath, username)
 	return &t
 }
 
 // Write data into the terminal/bash
 func (t *Terminal) Write(b []byte) (int, error) {
 	//fmt.Println("command received")
-	return t.ptmx.Write(b)
+	//CustomUtils.LogTime(string(b), "received")
+	return t.writer.Write(b)
 }
 
 func (t *Terminal) Read(b []byte) (int, error) {
-	n, e := t.ptmx.Read(b)
+	n, e := t.reader.Read(b)
+	//n, e := t.ptmx.Read(b)
+
 	for i := 0; i < n; i++ {
 		t.buffer.Insert(b[i])
 	}
+
 	return n, e
 }
 
+var buf = make([]byte, 32*1024)
+
 func (t *Terminal) read() {
-	b := make([]byte, 32*1024)
-	n, _ := t.ptmx.Read(b)
+	//b := make([]byte, 32*1024)
+	n, _ := t.reader.Read(buf)
 	for i := 0; i < n; i++ {
-		t.buffer.Insert(b[i])
+		t.buffer.Insert(buf[i])
 	}
-	//t.tmp.Write(b)
 }
 
 /*
@@ -133,6 +143,7 @@ func (t *Terminal) SetSizeVals(X, Y, COLS, ROWS uint16) {
 }
 
 func (t *Terminal) SetSize(winSize *pty.Winsize) {
+	fmt.Printf("Resizing Terminal")
 	t.resizeMux.Lock()
 	defer t.resizeMux.Unlock()
 	if err := pty.Setsize(t.ptmx, winSize); err != nil {
@@ -143,6 +154,7 @@ func (t *Terminal) SetSize(winSize *pty.Winsize) {
 func (t *Terminal) Close() {
 	// Make sure to close the pty at the end.
 	// Best effort.// Set stdin in raw mode.
+
 	defer func() { _ = t.ptmx.Close() }()
 	defer func() { _ = terminal.Restore(0, t.state) }() // Best effort.
 }
@@ -150,7 +162,7 @@ func (t *Terminal) Close() {
 // Creates and interactive bash session based on the ID and the file to use as history file, here we add the file to run for the initialization,
 // i.e. we change the bashrc for our own version that by itself call the user bashrc
 // the init file can be found in `/sssh_server/Assets/bashrc` *this should change to a local directory*
-func initInteractive(ID, historyPath, username string) *os.File {
+func initInteractive(ID, historyPath, username string) (*os.File, io.Reader, io.Writer) {
 	// Handle pty size.
 	basePath, err := filepath.Abs("Assets/")
 	fmt.Printf("basePath = %v \n", basePath)
@@ -173,32 +185,8 @@ func initInteractive(ID, historyPath, username string) *os.File {
 	ptmx, err := pty.Start(c)
 	CustomUtils.CheckPanic(err, "Could not initialize TerminalService")
 
-	return ptmx
+	return ptmx, ptmx, ptmx
 }
-
-//
-//func initLogin() *os.File{
-//	// Handle pty size.
-//	c := exec.Command("bash", "-l")
-//	// Start the command with a pty.
-//	ptmx, err := pty.Start(c)
-//	initialCmds(ptmx)
-//	CustomUtils.CheckPanic(err, "Could not initialize TerminalService");
-//	return ptmx
-//}
-//
-//func ReadNPrint(pty *os.File){
-//	r := []byte{}
-//	_, _ = pty.Read(r)
-//	fmt.Println("res :" +string(r))
-//}
-//
-//func initialCmds(pty *os.File) {
-//	path, err := filepath.Abs(relativePath)
-//	CustomUtils.CheckPrint(err)
-//	fmt.Println("path "+ path)
-//	_, _ = pty.WriteString(path + "\n")
-//}
 
 var ignoreInternalCmds = " export HISTCONTROL=ignorespace ; history -d $(history 1) \n\n"
 var readCmdHistory = func(cmd string) string { return fmt.Sprintf(" export PROMPT_COMMAND='%s' \n\n", cmd) }

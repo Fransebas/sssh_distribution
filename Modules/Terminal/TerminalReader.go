@@ -25,7 +25,10 @@ func min(a, b int) int {
 func (tr *TerminalReader) Read(p []byte) (n int, err error) {
 	// Update the buffer if necesary
 	tr.terminal.read()
-	return tr.BufferRead(p)
+
+	n, err = tr.BufferRead(p)
+	//CustomUtils.LogTime(string(p[:n]), "buffer read / send")
+	return
 }
 
 // Read the following bytes, from tr.offset to end and update offset
