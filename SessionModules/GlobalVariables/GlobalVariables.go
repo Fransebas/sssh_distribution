@@ -50,6 +50,7 @@ func (*GlobalVariables) storeVariable(bashVar BashVar) error {
 }
 
 func (*GlobalVariables) OnNewSession(s API.TerminalSessionInterface) {}
+func (*GlobalVariables) Close()                                      {}
 func (*GlobalVariables) OnNewConnection(sshSession *SSH.SSHSession)  {}
 
 func (g *GlobalVariables) OnUpdateVariables(vars string) {

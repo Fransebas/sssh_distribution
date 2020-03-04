@@ -13,6 +13,7 @@ import (
 	"os"
 	"sssh_server/CustomUtils"
 	"sssh_server/Modules/Authentication"
+	"sssh_server/Modules/SSH/SFTP"
 	"strings"
 )
 
@@ -219,7 +220,7 @@ func (server *SSSHServer) AcceptRequests(in <-chan *ssh.Request, channel *ssh.Ch
 			if string(req.Payload[4:]) == "sftp" {
 				// Requesting a SFTP
 				_ = req.Reply(true, nil)
-				go server.startSFTP(channel)
+				go server.startSFTP(channel, session)
 			}
 		default:
 			// our custom protocol here
@@ -233,19 +234,20 @@ func (server *SSSHServer) AcceptRequests(in <-chan *ssh.Request, channel *ssh.Ch
 	}
 }
 
-func (s *SSSHServer) startSFTP(channel *ssh.Channel) {
-	serverOptions := []sftp.ServerOption{
-		sftp.WithDebug(os.Stderr),
+func (s *SSSHServer) startSFTP(channel *ssh.Channel, session *SSHSession) {
+	handlerServer := SFTP.New(session.Conn.User())
+
+	handles := sftp.Handlers{
+		FileGet:  handlerServer,
+		FileList: handlerServer,
+		FileCmd:  handlerServer,
+		FilePut:  handlerServer,
 	}
-	server, err := sftp.NewServer(
-		*channel,
-		serverOptions...,
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
+
+	server := sftp.NewRequestServer(*channel, handles)
+
 	if err := server.Serve(); err == io.EOF {
-		server.Close()
+		_ = server.Close()
 		log.Print("sftp client exited session.")
 	} else if err != nil {
 		log.Fatal("sftp server completed with error:", err)

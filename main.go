@@ -53,6 +53,15 @@ func variables(w http.ResponseWriter, r *http.Request) {
 	//rpc.OnCommand(string(b))
 }
 
+func pwd(w http.ResponseWriter, r *http.Request) {
+	b, err := ioutil.ReadAll(r.Body)
+	CustomUtils.CheckPrint(err)
+
+	id := r.URL.Query().Get("SSSH_USER")
+	sessionService.UpdatePWD(string(b), id)
+	//rpc.OnCommand(string(b))
+}
+
 func getPublickKey(w http.ResponseWriter, r *http.Request) {
 	pubKey, e := sessionService.GetPubKey()
 	CustomUtils.CheckPanic(e, "Couldn't read pub key:")
@@ -68,6 +77,8 @@ func server(config Configuration.Configuration) {
 	// needed http
 	mux.HandleFunc("/newcommand", newCommand)
 	mux.HandleFunc("/variables", variables)
+	mux.HandleFunc("/pwd", pwd)
+
 	mux.HandleFunc("/pubKey", getPublickKey)
 
 	log.Printf("Serving at localhost:%v...\n", config.HTTPPort)

@@ -87,6 +87,13 @@ func addServices(terminalSession *TerminalSession) {
 	}
 }
 
+func (s *TerminalSession) Close() {
+	// Call lifecycle hooks on the service
+	for _, module := range s.Modules {
+		module.Close()
+	}
+}
+
 // Internal function to add services
 func (s *TerminalSession) addService(service API.Module) {
 	s.Modules = append(s.Modules, service)

@@ -27,3 +27,7 @@ func (cme *CommandExecuter) OnNewSession(session API.TerminalSessionInterface) {
 func (cme *CommandExecuter) OnNewConnection(sshSession *SSH.SSHSession) {
 
 }
+
+func (cme *CommandExecuter) Close() {
+
+}

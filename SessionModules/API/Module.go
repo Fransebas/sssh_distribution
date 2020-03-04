@@ -17,6 +17,7 @@ type Module interface {
 	OnNewSession(s TerminalSessionInterface)
 	OnNewConnection(sshSession *SSH.SSHSession)
 	GetHandlers() []*RequestHandler
+	Close()
 	//GetHTTPHandlers()
 	//SetHandlers(sessionService *SessionLayer.SessionService)
 }
@@ -28,6 +29,7 @@ type ClientCode func(cmnd string) string
 //	OnCommandRun(cmnd string) string
 //}
 
+// TODO: not working
 // this interface is if your service needs specific information from "inside" the bash session,
 // for example, the environment variables or the last run command
 type OnCommandService interface {
@@ -40,6 +42,11 @@ type OnCommandService interface {
 
 type HistoryService interface {
 	OnNewCommand(cmnd string)
+}
+
+// Runs every time the user types a command and returns the current working directory
+type PWDService interface {
+	OnPWD(path string)
 }
 
 type VariablesService interface {
