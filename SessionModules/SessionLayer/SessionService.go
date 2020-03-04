@@ -118,8 +118,34 @@ func (s *SessionService) createSession(msgType string, sshSession *SSH.SSHSessio
 }
 
 // Renames the session
-func (s *SessionService) changeSessionName(name, id string) {
+func (s *SessionService) changeSessionName(name, id string) *TerminalSession {
 	s.Sessions[id].Name = name
+	return s.Sessions[id]
+}
+
+// Renames the session
+func (s *SessionService) Close() {
+
+}
+
+// Deletes the session
+func (s *SessionService) deleteSession(id string) *TerminalSession {
+	var session = s.Sessions[id]
+	session.Close()
+	delete(s.Sessions, id)
+	return session
+}
+
+func (s *SessionService) openSessions(w io.Writer, r io.Reader) {
+	// Return all the open sessions for the client to choose
+	var sessions = []*TerminalSession{}
+	for _, session := range s.Sessions {
+		sessions = append(sessions, session)
+	}
+	b, e := json.Marshal(sessions)
+	CustomUtils.CheckPanic(e, "Unable to parse sessions, this should never happen")
+	_, e = w.Write(b)
+	CustomUtils.CheckPrint(e)
 }
 
 // Make the mapping for any kind of messages
@@ -138,21 +164,20 @@ func (s *SessionService) ChannelHandler() {
 			// On the session message create a new session
 			s.createSession(msgType, sshSession, limitlessChannel, r)
 		} else if msgType == "open.sessions" {
-			// Return all the open sessions for the client to choose
-			var sessions = []*TerminalSession{}
-			for _, session := range s.Sessions {
-				sessions = append(sessions, session)
-			}
-			b, e := json.Marshal(sessions)
-			CustomUtils.CheckPanic(e, "Unable to parse sessions, this should never happen")
-			_, e = limitlessChannel.Write(b)
-			CustomUtils.CheckPrint(e)
+			s.openSessions(limitlessChannel, r)
 		} else if msgType == "session.name" {
 			b, _ := CustomUtils.Read(r)
 			var auxSession TerminalSession
 			_ = json.Unmarshal(b, &auxSession)
-			s.changeSessionName(auxSession.Name, auxSession.ID)
-
+			newSessions := s.changeSessionName(auxSession.Name, auxSession.ID)
+			b2, _ := json.Marshal(newSessions)
+			_, _ = limitlessChannel.Write(b2)
+		} else if msgType == "session.delete" {
+			b, _ := CustomUtils.Read(r)
+			var auxSession TerminalSession
+			_ = json.Unmarshal(b, &auxSession)
+			s.deleteSession(auxSession.ID)
+			s.openSessions(limitlessChannel, r)
 		} else {
 			terminalSession := s.SSHSessionToTerminalSession(sshSession)
 
@@ -200,6 +225,18 @@ func (ss *SessionService) UpdateVariables(data string, id string) {
 		for _, service := range session.Modules {
 			if variablesService, ok := service.(API.VariablesService); ok {
 				variablesService.OnUpdateVariables(data)
+			}
+		}
+	}
+}
+
+// Updates pwd
+func (ss *SessionService) UpdatePWD(path string, id string) {
+	if _, ok := ss.Sessions[id]; ok {
+		session := ss.Sessions[id]
+		for _, service := range session.Modules {
+			if pwdService, ok := service.(API.PWDService); ok {
+				pwdService.OnPWD(path)
 			}
 		}
 	}

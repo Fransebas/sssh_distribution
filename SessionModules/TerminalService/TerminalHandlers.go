@@ -76,5 +76,19 @@ func (ts *TerminalService) GetHandlers() []*API.RequestHandler {
 		Name: "terminal.resize",
 	}
 
-	return []*API.RequestHandler{&terminalConnection, &terminalResize}
+	terminalPWD := API.RequestHandler{
+		RequestHandler: func(w io.Writer, r io.Reader) {
+			// Send the current working directory every time it changes
+			_, e := w.Write([]byte(ts.pwd))
+			CustomUtils.CheckPrint(e)
+
+			ts.pwdChange = func(path string) {
+				_, _ = w.Write([]byte(ts.pwd))
+			}
+
+		},
+		Name: "terminal.pwd",
+	}
+
+	return []*API.RequestHandler{&terminalConnection, &terminalResize, &terminalPWD}
 }

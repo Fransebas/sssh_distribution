@@ -7,27 +7,6 @@ createIfNotExist(){
 }
 
 
-# This code si to run the content of ~/.bashrc
-# because it doesn't have run permissions so we need to change the permissions
-# and then change them back
-#runUserBash(){
-#    if [ "$(uname)" == "Darwin" ]; then
-#        # Do something under Mac OS X platform
-#        mod = `stat -f "%OLp" ~/.bashrc`
-#    elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-#        # Do something under GNU/Linux platform
-#        mod = `stat --format '%a' ~/.bashrc`
-#        echo "$mod"
-#    elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
-#        # Do something under 32 bits Windows NT platform
-#        echo "Not supported"
-#    elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW64_NT" ]; then
-#        # Do something under 64 bits Windows NT platform
-#        echo "Not supported"
-#    fi
-#}
-
-
 #history -anrw $HIST_FILE_NAME
 
 createIfNotExist ~/.bashrc
@@ -59,10 +38,10 @@ export HISTCONTROL=ignorespace ; history -d 1
 # export PROMPT_COMMAND='curl --data "$(history 1)" http://localhost:2000/newcommand?SSSH_USER=$SSSH_USER'
 
 # This is for production
-curl --data "$(history)" http://localhost:2000/newcommand?SSSH_USER=$SSSH_USER &> /dev/null
-# export PROMPT_COMMAND='curl --data "$(history 1)" http://localhost:2000/newcommand?SSSH_USER=$SSSH_USER &> /dev/null'
+$SSSH -mode=prompt -userid=$SSSH_USER -history="$(history)" -pwd="$HOME"
+#curl --data "$(history)" http://localhost:2000/newcommand?SSSH_USER=$SSSH_USER &> /dev/null
 
-export PROMPT_COMMAND='$SSSH -mode=prompt -userid=$SSSH_USER -history="$(history 1)"'
+export PROMPT_COMMAND='$SSSH -mode=prompt -userid=$SSSH_USER -history="$(history 1)" -pwd="$(pwd)"'
 
  cd
 

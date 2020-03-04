@@ -12,6 +12,7 @@ var modePtr = flag.String("mode", "server", `Select a mode for the program, avai
 // Internal use flags (prompt)
 var userIdPtr = flag.String("userid", "error", "Send the id of the user should be used with the mode flag set to prompt")
 var historyPtr = flag.String("history", "error", "The history of the bash, should be used with the model flag set to prompt")
+var pwdPtr = flag.String("pwd", "-", "The current working directory, should be used with the model flag set to prompt")
 
 // END: Internal use flags
 
@@ -52,16 +53,22 @@ type FingerprintConfig struct {
 	Url             string
 }
 
+type PromptConfig struct {
+	Pwd     string
+	History string
+	UserId  string
+}
+
 type Configuration struct {
 	Mode              string
 	UserId            string
-	History           string
 	HTTPPort          int
 	Port              int
 	RPCPort           int
 	KeyFile           string
 	KeygenConfig      KeygenConfig
 	FingerprintConfig FingerprintConfig
+	PromptConfig      PromptConfig
 }
 
 func (c *Configuration) initKeygen() {
@@ -76,15 +83,21 @@ func (c *Configuration) initFingerprint() {
 	c.FingerprintConfig.Url = *fingerprintURL
 }
 
+func (c *Configuration) initPrompt() {
+	c.PromptConfig.Pwd = *pwdPtr
+	c.PromptConfig.History = *historyPtr
+	c.PromptConfig.UserId = *userIdPtr
+}
+
 func (c *Configuration) Init() {
 	flag.Parse()
 	c.Mode = *modePtr
 	c.UserId = *userIdPtr
-	c.History = *historyPtr
 	c.HTTPPort = *httPortPtr
 	c.RPCPort = *rpcPortPtr
 	c.KeyFile = *keyFile
 	c.Port = *portPtr
 	c.initKeygen()
 	c.initFingerprint()
+	c.initPrompt()
 }

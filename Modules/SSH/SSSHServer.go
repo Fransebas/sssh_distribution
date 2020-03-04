@@ -235,10 +235,6 @@ func (server *SSSHServer) AcceptRequests(in <-chan *ssh.Request, channel *ssh.Ch
 }
 
 func (s *SSSHServer) startSFTP(channel *ssh.Channel, session *SSHSession) {
-	//serverOptions := []sftp.ServerOption{
-	//	sftp.WithDebug(os.Stderr),
-	//}
-
 	handlerServer := SFTP.New(session.Conn.User())
 
 	handles := sftp.Handlers{
@@ -250,13 +246,6 @@ func (s *SSSHServer) startSFTP(channel *ssh.Channel, session *SSHSession) {
 
 	server := sftp.NewRequestServer(*channel, handles)
 
-	////server, err := sftp.NewServer(
-	////	*channel,
-	////	serverOptions...,
-	////)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
 	if err := server.Serve(); err == io.EOF {
 		_ = server.Close()
 		log.Print("sftp client exited session.")

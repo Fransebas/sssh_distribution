@@ -32,6 +32,8 @@ func (cl *CommandListService) OnNewSession(session API.TerminalSessionInterface)
 }
 func (cl *CommandListService) OnNewConnection(sshSession *SSH.SSHSession) {}
 
+func (cl *CommandListService) Close() {}
+
 func (cl *CommandListService) getList(arg string) []Models.Command {
 	c := exec.Command("compgen", strings.Split(arg, " ")...)
 	b, e := c.Output()

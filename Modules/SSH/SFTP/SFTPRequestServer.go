@@ -22,6 +22,12 @@ const (
 	Remove  = "Remove"
 )
 
+const (
+	List     = "List"
+	Stat     = "Stat"
+	Readlink = "Readlink"
+)
+
 type SFTPRequestServer struct {
 	user string
 }
@@ -33,6 +39,7 @@ func New(user string) *SFTPRequestServer {
 }
 
 func (s *SFTPRequestServer) Filecmd(r *sftp.Request) error {
+	fmt.Printf("Filecmd method %v \n", r.Method)
 	path := r.Filepath
 	target := r.Target
 
@@ -92,6 +99,7 @@ func (s *SFTPRequestServer) Filecmd(r *sftp.Request) error {
 	}
 }
 
+// change path owner to username
 func chown(username, path string) (e error) {
 	usr, e := user.Lookup(username)
 	if e != nil {
@@ -150,13 +158,15 @@ func (s *SFTPRequestServer) Filewrite(r *sftp.Request) (io.WriterAt, error) {
 }
 
 func (s *SFTPRequestServer) Filelist(r *sftp.Request) (sftp.ListerAt, error) {
+
 	path := r.Filepath
-	if !s.CanRead(path) {
+	if !(s.CanExecute(path) || s.CanRead(path)) {
+		//fmt.Printf("ERROR File list method %v in path %v\n", r.Method, path)
 		return nil, sftp.ErrSSHFxPermissionDenied
 	}
 
 	switch r.Method {
-	case "List":
+	case List:
 		f, e := os.Open(r.Filepath)
 		defer f.Close()
 		if e != nil {
@@ -167,10 +177,10 @@ func (s *SFTPRequestServer) Filelist(r *sftp.Request) (sftp.ListerAt, error) {
 			return nil, e
 		}
 		return listAt(l), nil
-	case "Stat":
+	case Stat:
 		fi, e := os.Stat(path)
 		return listAt([]os.FileInfo{fi}), e
-	case "Readlink":
+	case Readlink:
 		return nil, errors.New("Readlink not implemented yet =(")
 	default:
 		return nil, errors.New(fmt.Sprintf("Method %v not supported", r.Method))

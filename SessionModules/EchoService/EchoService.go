@@ -14,6 +14,11 @@ type EchoService struct {
 func (e *EchoService) OnNewSession(session API.TerminalSessionInterface) {
 
 }
+
+func (e *EchoService) Close() {
+
+}
+
 func (e *EchoService) OnNewConnection(sshSession *SSH.SSHSession) {
 
 }

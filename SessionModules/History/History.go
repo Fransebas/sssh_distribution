@@ -31,6 +31,10 @@ func (h *History) OnNewSession(session API.TerminalSessionInterface) {
 	h.readCommandsInFile(config.GetHistoryFilePath())
 }
 
+func (h *History) Close() {
+
+}
+
 func (h *History) OnNewConnection(sshSession *SSH.SSHSession) {
 
 }
