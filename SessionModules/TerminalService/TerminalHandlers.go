@@ -31,7 +31,7 @@ func (ts *TerminalService) GetHandlers() []*API.RequestHandler {
 			// writer hence this should stop in only half of the cases
 			go func() {
 				_, e := io.Copy(ts.Terminal, r)
-				fmt.Printf("Connection Lost %v", e)
+				fmt.Printf("Writing Connection Lost %v", e)
 			}()
 
 			b := make([]byte, 1024*8)
@@ -54,7 +54,7 @@ func (ts *TerminalService) GetHandlers() []*API.RequestHandler {
 			//}
 
 			_, e = io.Copy(w, &reader)
-			fmt.Printf("Connection Lost %v", e)
+			fmt.Printf("Reading Connection Lost %v", e)
 		},
 		Name: "terminal",
 	}

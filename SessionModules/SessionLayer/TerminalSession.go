@@ -1,9 +1,7 @@
 package SessionLayer
 
 import (
-	"fmt"
-	"path/filepath"
-	"sssh_server/CustomUtils"
+	"sssh_server/Modules/DirectoryManager"
 	"sssh_server/Modules/SSH"
 	"sssh_server/SessionModules/API"
 	"time"
@@ -35,10 +33,10 @@ func newSession(id, username string) (s *TerminalSession) {
 	//s.recentCommandsMutex.Lock()
 	//s.InitTerminal()
 	s.Modules = []API.Module{}
-	s.InitConfig()
 	s.TimeCreated = time.Now().Unix()
 	s.LastConnected = time.Now().Unix()
 	s.Username = username
+	s.InitConfig()
 
 	addServices(s)
 
@@ -61,10 +59,10 @@ func (s *TerminalSession) InitConfig() {
 	s.Config = API.SessionConfig{}
 	s.Config.SessionID = s.ID
 
-	basePath, err := filepath.Abs("Assets/")
-	CustomUtils.CheckPanic(err, "Could not create history file for the session")
-	historyFilePath := fmt.Sprintf("%v/%v", basePath, HISTORY_FILE_NAME+s.ID)
-	s.Config.HistoryFilePath = historyFilePath
+	dm := DirectoryManager.New(s.Username)
+
+	s.Config.HistoryFilePath = dm.GetVariableFile(HISTORY_FILE_NAME + s.ID)
+	s.Config.BashrcFilePath = dm.GetConfigFile("bashrc")
 }
 
 func (s *TerminalSession) OnNewSessionLifecycleHook() {

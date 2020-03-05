@@ -15,7 +15,7 @@ type TerminalService struct {
 
 func (ts *TerminalService) OnNewSession(session API.TerminalSessionInterface) {
 	config := session.GetConfig()
-	ts.Terminal = Terminal.InitTerminal(session.GetID(), config.GetHistoryFilePath(), session.GetUsername())
+	ts.Terminal = Terminal.InitTerminal(session.GetID(), config.GetHistoryFilePath(), config.GetBashrcFilePath(), session.GetUsername())
 	ts.Terminal.Run()
 
 }

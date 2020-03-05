@@ -5,12 +5,11 @@ import (
 	"github.com/creack/pty"
 	"golang.org/x/crypto/ssh/terminal"
 	"io"
+	"io/ioutil"
 	"log"
-
 	//"log"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"sssh_server/CustomUtils"
 	"sssh_server/Modules/SSH"
 	"sync"
@@ -51,7 +50,7 @@ func (t *Terminal) GetBuffer() []byte {
 }
 
 // Constructor
-func InitTerminal(id string, historyPath string, username string) *Terminal {
+func InitTerminal(id, historyPath, bashrc, username string) *Terminal {
 	var t Terminal
 
 	t.buffer = CustomUtils.New(1000000) /// 1000000 is 1 MB maybe I should use less
@@ -70,7 +69,7 @@ func InitTerminal(id string, historyPath string, username string) *Terminal {
 	//CustomUtils.CheckPanic(err, "Could not create history file for the session")
 	//t.HistoryFilePath = fmt.Sprintf("%v/%v", basePath, FILE_NAME)
 
-	t.ptmx, t.reader, t.writer = initInteractive(id, historyPath, username)
+	t.ptmx, t.reader, t.writer = initInteractive(id, historyPath, bashrc, username)
 	return &t
 }
 
@@ -159,23 +158,43 @@ func (t *Terminal) Close() {
 	defer func() { _ = terminal.Restore(0, t.state) }() // Best effort.
 }
 
+func createFiles(bashrc, username string) {
+	bashrcPath := bashrc
+	if _, err := os.Stat(bashrcPath); err == nil {
+		// path/to/whatever exists
+
+	} else if os.IsNotExist(err) {
+		// path/to/whatever does *not* exist
+
+		// This will create the file for the user with the right permissions
+		CustomUtils.ExecuteCommand(fmt.Sprintf(`sudo -u %v touch "%v"`, username, bashrcPath))
+		err = ioutil.WriteFile(bashrcPath, []byte(Bashrc), 0755)
+		CustomUtils.CheckPanic(err, "unable to create bashrc")
+
+	} else {
+		// Schrodinger: file may or may not exist. See err for details.
+
+		// Therefore, do *NOT* use !os.IsNotExist(err) to test for file existence
+	}
+}
+
 // Creates and interactive bash session based on the ID and the file to use as history file, here we add the file to run for the initialization,
 // i.e. we change the bashrc for our own version that by itself call the user bashrc
 // the init file can be found in `/sssh_server/Assets/bashrc` *this should change to a local directory*
-func initInteractive(ID, historyPath, username string) (*os.File, io.Reader, io.Writer) {
+func initInteractive(ID, historyPath, bashrc, username string) (*os.File, io.Reader, io.Writer) {
 	// Handle pty size.
-	basePath, err := filepath.Abs("Assets/")
-	fmt.Printf("basePath = %v \n", basePath)
-	relativePath := fmt.Sprintf("%v/bashrc", basePath)
-	path := relativePath
-	fmt.Println("path " + path)
+
+	createFiles(bashrc, username)
 
 	// Send the initialization file the variables it's going to use
-	initCommand := `export SSSH=%v; export SSSH_USER=%v; export HIST_FILE_NAME=%v; bash --rcfile %s -i`
+	initCommand := `export SSSH=%v; export SSSH_USER=%v; export HIST_FILE_NAME='%v'; bash --rcfile '%s' -i`
 	userBash := fmt.Sprintf(`sudo -H -u %v bash -c "%v"`, username, initCommand)
 	//-c "login -p -f fransebas"
-	bash := fmt.Sprintf(userBash, "sssh_server", ID, historyPath, path)
+	bash := fmt.Sprintf(userBash, "sssh_server", ID, historyPath, bashrc)
 	//bash := fmt.Sprintf(`export SSSH=%v; export SSSH_USER=%v; export HIST_FILE_NAME=%v; bash --rcfile %s -c "login fransebas"`, "~/go/src/sssh_server/sssh_server", ID, historyPath, path)
+
+	fmt.Println("bash = " + bash)
+
 	c := exec.Command("bash", "-c", bash)
 
 	//c := exec.Command("bash", "--rcfile", path, "-i")
