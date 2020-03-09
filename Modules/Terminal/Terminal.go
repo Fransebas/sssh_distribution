@@ -190,7 +190,8 @@ func initInteractive(ID, historyPath, bashrc, username string) (*os.File, io.Rea
 	initCommand := `export SSSH=%v; export SSSH_USER=%v; export HIST_FILE_NAME='%v'; bash --rcfile '%s' -i`
 	userBash := fmt.Sprintf(`sudo -H -u %v bash -c "%v"`, username, initCommand)
 	//-c "login -p -f fransebas"
-	bash := fmt.Sprintf(userBash, "sssh_server", ID, historyPath, bashrc)
+	ssshPath, _ := os.Executable()
+	bash := fmt.Sprintf(userBash, ssshPath, ID, historyPath, bashrc)
 	//bash := fmt.Sprintf(`export SSSH=%v; export SSSH_USER=%v; export HIST_FILE_NAME=%v; bash --rcfile %s -c "login fransebas"`, "~/go/src/sssh_server/sssh_server", ID, historyPath, path)
 
 	fmt.Println("bash = " + bash)
