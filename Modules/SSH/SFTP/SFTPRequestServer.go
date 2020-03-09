@@ -6,8 +6,8 @@ import (
 	"github.com/pkg/sftp"
 	"io"
 	"os"
-	"os/User"
 	"os/exec"
+	"os/user"
 	"strconv"
 	"strings"
 )
