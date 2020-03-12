@@ -90,6 +90,8 @@ func New(user string) *DirectoryManager {
 	fmt.Println("User #!@#$!@#$!#@$!@#$   " + user)
 	s := CustomUtils.ExecuteCommand(fmt.Sprintf("sudo -u %v echo $HOME", user))
 	s = s[:len(s)-1]
+
+	fmt.Println("ssssssssssssssss   " + s)
 	dm := DirectoryManager{
 		UserDirectory:  s,
 		ConfigFolder:   getConfigFolder(s, "", user),
