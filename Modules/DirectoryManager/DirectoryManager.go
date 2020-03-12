@@ -93,10 +93,10 @@ func New(user string) *DirectoryManager {
 	if runtime.GOOS == "darwin" {
 		s = CustomUtils.ExecuteCommand(fmt.Sprintf("sudo -u %v echo $HOME", user))
 	} else {
-		s = CustomUtils.ExecuteCommand(fmt.Sprintf(`su - %v "echo ~"`, user))
+		s = CustomUtils.ExecuteCommand(fmt.Sprintf(`su - %v -c "echo ~"`, user))
 	}
-	s = s[:len(s)-1]
 	fmt.Println("ssssssssssssssss   " + s)
+	s = s[:len(s)-1]
 	dm := DirectoryManager{
 		UserDirectory:  s,
 		ConfigFolder:   getConfigFolder(s, "", user),
