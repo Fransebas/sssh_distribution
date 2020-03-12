@@ -89,9 +89,13 @@ func removeStartSlash(path string) string {
 func New(user string) *DirectoryManager {
 	fmt.Println("User #!@#$!@#$!#@$!@#$   " + user)
 	fmt.Println("pppppppppppp   " + fmt.Sprintf("sudo -u %v echo $HOME", user))
-	s := CustomUtils.ExecuteCommand(fmt.Sprintf("sudo -u %v echo $HOME", user))
+	var s string
+	if runtime.GOOS == "darwin" {
+		s = CustomUtils.ExecuteCommand(fmt.Sprintf("sudo -u %v echo $HOME", user))
+	} else {
+		s = CustomUtils.ExecuteCommand(fmt.Sprintf(`su - %v "echo ~"`, user))
+	}
 	s = s[:len(s)-1]
-
 	fmt.Println("ssssssssssssssss   " + s)
 	dm := DirectoryManager{
 		UserDirectory:  s,
