@@ -27,7 +27,8 @@ func getConfigFolder(homeArg, pathArg, username string) string {
 	} else {
 		// linux and something else
 		// TODO: validate other OS's
-		dir = fmt.Sprintf("%v/etc/ssh_client", home)
+		dir = fmt.Sprintf("%v/.sssh_server", home)
+		//dir = fmt.Sprintf("%v/etc/ssh_client", home)
 	}
 
 	// Create directory if not exist
@@ -52,7 +53,7 @@ func getVariableFolder(homeArg, pathArg, username string) string {
 	} else {
 		// linux and something else
 		// TODO: validate other OS's
-		dir = fmt.Sprintf("%v/var/ssh_client", home)
+		dir = fmt.Sprintf("%v/.sssh_server", home)
 	}
 
 	// Create directory if not exist
