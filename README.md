@@ -1,8 +1,8 @@
 # SSSH Alpha version
 
-SSSH is an augmentation for the SSH protocol which adds GUI elements to improve the usability of a terminal. The current functionalities are (all the comunication are transmited over a ssh connection):
+SSSH is an augmentation for the SSH protocol which adds GUI elements to improve the usability of a terminal. The current functionalities are (all the communication are transmitted over an ssh connection):
 
-* Mange servers configurations:
+* Manage servers configurations:
   * Username
   * Password
   * Authentication key
@@ -10,7 +10,7 @@ SSSH is an augmentation for the SSH protocol which adds GUI elements to improve 
 * Bash terminal.
 * File explorer.
 * History GUI:
-  * List of used commands.
+  * List of recently used commands.
   * Search.
   * Locally save commands.
 * List of all commands installed:
@@ -21,9 +21,11 @@ SSSH is an augmentation for the SSH protocol which adds GUI elements to improve 
 * Manual Visualizer for commands.
 * *The ability to create Plug-ins.
 
-*The Plug-in support is on development but the current implementation takes this into consideration and every functionallity above is created like a plug-in that uses an API.
+*The Plug-in support is on development but the current implementation takes this into consideration and every functionality above is created like a plug-in that uses an API.
 
-The idea for the SSSH protocol is to create a GUI for every unix utility that would improve the use of a terminal, for example the `History` functionallity is a GUI to manage the `history` command and can help terminal users to locally save frequent used commands for later use or help the search of a used command in a more visual way than using `ctrl + r` or hitting the up arrow multiple times.
+The idea for the SSSH protocol is to create a GUI for every Unix utility that would improve the use of a terminal, for example, the `History` functionality is a GUI to manage the `history` command and can help terminal users to locally save frequently used commands for later use or help search the command history in a more visual way than using `ctrl + r` or hitting the up arrow multiple times.
+
+As a dummy example to illustrate this idea, let's image a Plug-in that has a simple GUI to control `chmod` which is not a hard command to use but this GUI could help people that don't know by memory all the modifier values for `chmod` also it could help people that use that command in a regular basis by making it faster to use (maybe remembering the last used modifiers) and also having a file selector to quickly select the file to apply the modifiers.
 
 # Index
 * [Server](#server)
