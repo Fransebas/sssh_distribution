@@ -9,7 +9,7 @@ This repository is to distribute the code for SSSH
 
 # Server
 
-The server currently only supports Unix-like systems, it has been tested in Macos, Ubuntu, Debian Jessy (raspberry pi). Any compatibility issue with a different Unix system, please open an issue.
+The server currently only supports Unix-like systems, it has been tested in macos (10.14.6), Ubuntu (16), Debian Jessy (raspberry pi). Any compatibility issue with a different Unix system, please open an issue.
 
 ## Running the server
 
@@ -53,3 +53,9 @@ The current flags for the `fingerprint` mode are:
 
 - `file` The location of your key, the default value is the current directory i.e. `./id_rsa` and `./id_rsa.pub`
 - `server` The URL for the server (use this only for debugging, this is not secure for remote servers), default `localhost`
+
+
+# Client
+
+The client currently only supports Unix-like systems and Windows 10 (<= 1809), it has been tested in macos (10.14.6), Ubuntu (16), Windows (latest version on 3/14/2020). Any compatibility problem please reported it in the issue section.
+
