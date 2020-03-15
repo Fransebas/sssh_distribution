@@ -2,6 +2,11 @@
 
 This repository is to distribute the code for SSSH
 
+* [Server](#server)
+  * [Running the server](#running-the-server)
+  * [Creating an RSA key](#creating-an-rsa-key)
+  * [Getting the key fingerprint](#getting-the-key-fingerprint)
+
 # Server
 
 The server currently only supports Unix-like systems, it has been tested in Macos, Ubuntu, Debian Jessy (raspberry pi). Any compatibility issue with a different Unix system, please open an issue.
