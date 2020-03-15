@@ -6,6 +6,7 @@ This repository is to distribute the code for SSSH
   * [Running the server](#running-the-server)
   * [Creating an RSA key](#creating-an-rsa-key)
   * [Getting the key fingerprint](#getting-the-key-fingerprint)
+* [Client](#client)
 
 # Server
 
