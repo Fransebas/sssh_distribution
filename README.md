@@ -23,7 +23,7 @@ SSSH is an augmentation for the SSH protocol which adds GUI elements to improve 
 
 *The Plug-in support is on development but the current implementation takes this into consideration and every functionallity above is created like a plug-in that uses an API.
 
-The idea for the SSSH protocol is to create a GUI for every unix utility that would improve the use of a terminal, for example the `History` functionallity is a GUI to manage the `history` command and can help terminal users to locally save frequent used commands for later use or help the search of a used command in a more visual way than using `ctrl + r`.
+The idea for the SSSH protocol is to create a GUI for every unix utility that would improve the use of a terminal, for example the `History` functionallity is a GUI to manage the `history` command and can help terminal users to locally save frequent used commands for later use or help the search of a used command in a more visual way than using `ctrl + r` or hitting the up arrow multiple times.
 
 # Index
 * [Server](#server)
