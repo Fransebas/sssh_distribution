@@ -1,7 +1,25 @@
 # SSSH Alpha version
 
-This repository is to distribute the code for SSSH
+SSSH is an augmentation for the SSH protocol which adds GUI elements to improve the usability of a terminal. The current functionalities are (all the comunication are transmited over a ssh connection):
 
+* Mange servers configurations:
+  * Username
+  * Password
+  * Authentication key
+  * Host IP
+* Bash terminal.
+* File explorer.
+* History GUI:
+  * List of used commands.
+  * Search.
+  * Locally save commands.
+* List of all commands installed:
+  * Search.
+  * Locally save commands.
+* Text editor for remote files (with command support for those vim lovers).
+* List of current variables in the bash terminal (working on more improvements).
+
+# Index
 * [Server](#server)
   * [Running the server](#running-the-server)
   * [Creating an RSA key](#creating-an-rsa-key)
