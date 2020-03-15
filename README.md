@@ -18,6 +18,12 @@ SSSH is an augmentation for the SSH protocol which adds GUI elements to improve 
   * Locally save commands.
 * Text editor for remote files (with command support for those vim lovers).
 * List of current variables in the bash terminal (working on more improvements).
+* Manual Visualizer for commands.
+* *The ability to create Plug-ins.
+
+*The Plug-in support is on development but the current implementation takes this into consideration and every functionallity above is created like a plug-in that uses an API.
+
+The idea for the SSSH protocol is to create a GUI for every unix utility that would improve the use of a terminal, for example the `History` functionallity is a GUI to manage the `history` command and can help terminal users to locally save frequent used commands for later use or help the search of a used command in a more visual way than using `ctrl + r`.
 
 # Index
 * [Server](#server)
@@ -29,7 +35,6 @@ SSSH is an augmentation for the SSH protocol which adds GUI elements to improve 
 # Server
 
 The server currently only supports Unix-like systems, it has been tested in macos (10.14.6), Ubuntu (16), Debian Jessy (raspberry pi). Any compatibility issue with a different Unix system, please open an issue.
-
 ## Running the server
 
 Note: I'm working on the right way to run the server as a service on boot but in the meantime, you need to run it manually.
