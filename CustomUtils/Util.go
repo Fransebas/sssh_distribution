@@ -1,23 +1,34 @@
 package CustomUtils
 
 import (
-	"fmt"
 	"io"
 	"math/rand"
 	"os/exec"
-	"runtime/debug"
+	"sssh_server/Modules/Logging"
 )
+
+var Logger *Logging.Logging
+
+func init() {
+	Logger = Logging.New()
+}
 
 func CheckPanic(e error, msg string) {
 	if e != nil {
+		Logger.Printlnf(Logging.ERROR, "%v", e)
 		panic(e.Error() + msg)
 	}
 }
 
+func Print(msg string) {
+	Logger.Println(Logging.INFO, msg)
+}
+
 func CheckPrint(e error) {
 	if e != nil {
-		debug.PrintStack()
-		fmt.Println("error 5 : " + e.Error())
+		//debug.PrintStack()
+		Logger.Printlnf(Logging.ERROR, "%v", e)
+
 	}
 }
 

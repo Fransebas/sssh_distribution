@@ -18,7 +18,7 @@ var pwdPtr = flag.String("pwd", "-", "The current working directory, should be u
 
 // SSSH server
 var httPortPtr = flag.Int("httpport", 2000, "HTTPPort for the http server")
-var portPtr = flag.Int("port", 2222, "HTTPPort for the sssh server, default 2222")
+var portPtr = flag.Int("port", 2222, "Port for the sssh server, default 2222")
 var rpcPortPtr = flag.Int("rpcport", 2001, "Select a port for the rpc (internal process communication)")
 var keyFile = flag.String("keyfile", "id_rsa", "If this flag is set, this key will be used to authenticate the host")
 
@@ -28,7 +28,7 @@ var keyFile = flag.String("keyfile", "id_rsa", "If this flag is set, this key wi
 var kryTypePtr = flag.String("type", "rsa", `Type of keys to generate, valid values include:
 	rsa : generates a rsa key specified in PKCS#1 with the format used by open-ssh
 	ecdsa : (experimental please do not use) generates a ECDSA256 key with the format used by open-ssl`)
-var filenamePtr = flag.String("Filename", "id_rsa", `Filename to store or read the key`)
+var filenamePtr = flag.String("filename", "id_rsa", `Filename to store or read the key`)
 
 // END: KeygenFlags
 

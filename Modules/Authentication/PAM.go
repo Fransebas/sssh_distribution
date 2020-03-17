@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Fransebas/golang-pam"
+	"sssh_server/Modules/Logging"
 
 	//"github.com/vvanpo/golang-pam"
 	"sssh_server/CustomUtils"
@@ -104,10 +105,10 @@ func (m myConHand) RespondPAM(msg_style int, msg string) (string, bool) {
 		// Here pam asks for the username
 		return UserPssword.Username, true
 	case pam.ERROR_MSG:
-		fmt.Println(msg)
+		CustomUtils.Logger.Println(Logging.INFO, msg)
 		return "", true
 	case pam.TEXT_INFO:
-		fmt.Println(msg)
+		//fmt.Println(msg)
 		return "", true
 	default:
 		return "", true

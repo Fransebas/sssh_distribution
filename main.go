@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"github.com/rs/cors"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"sssh_server/CustomUtils"
 	"sssh_server/Modules/Configuration"
+	"sssh_server/Modules/Logging"
 	"sssh_server/Programs"
 	"sssh_server/SessionModules/RPC"
 	"sssh_server/SessionModules/SessionLayer"
@@ -72,6 +72,8 @@ func getPublickKey(w http.ResponseWriter, r *http.Request) {
 
 func server(config Configuration.Configuration) {
 	//r := mux.NewRouter()
+	CustomUtils.Logger.Printlnf(Logging.INFO, "Serving at localhost:%v", config.HTTPPort)
+
 	mux := http.NewServeMux()
 	sessionService = SessionLayer.Constructor(config.KeyFile, config.Port)
 	// needed http
@@ -81,11 +83,13 @@ func server(config Configuration.Configuration) {
 
 	mux.HandleFunc("/pubKey", getPublickKey)
 
-	log.Printf("Serving at localhost:%v...\n", config.HTTPPort)
 	handler := cors.Default().Handler(mux)
 	go sessionService.Serve()
 
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", config.HTTPPort), handler))
+	e := http.ListenAndServe(fmt.Sprintf(":%v", config.HTTPPort), handler)
+
+	CustomUtils.CheckPanic(e, "Server stop")
+	CustomUtils.Logger.Printlnf(Logging.INFO, "Stop")
 }
 
 func main() {

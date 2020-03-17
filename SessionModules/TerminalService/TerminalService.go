@@ -1,7 +1,6 @@
 package TerminalService
 
 import (
-	"fmt"
 	"sssh_server/Modules/SSH"
 	"sssh_server/Modules/Terminal"
 	"sssh_server/SessionModules/API"
@@ -30,7 +29,6 @@ func (ts *TerminalService) Close() {
 
 func (ts *TerminalService) OnPWD(path string) {
 	ts.pwd = path
-	fmt.Printf("\nPWD %v\n", path)
 
 	if ts.pwdChange != nil {
 		ts.pwdChange(ts.pwd)

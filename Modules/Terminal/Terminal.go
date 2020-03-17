@@ -145,9 +145,8 @@ func (t *Terminal) SetSizeVals(X, Y, COLS, ROWS uint16) {
 func (t *Terminal) SetSize(winSize *pty.Winsize) {
 	t.resizeMux.Lock()
 	defer t.resizeMux.Unlock()
-	if err := pty.Setsize(t.ptmx, winSize); err != nil {
-		log.Printf("error resizing pty: %s", err)
-	}
+	err := pty.Setsize(t.ptmx, winSize)
+	log.Printf("error resizing pty: %s", err)
 }
 
 func (t *Terminal) Close() {
@@ -193,8 +192,6 @@ func initInteractive(ID, historyPath, bashrc, username string) (*os.File, io.Rea
 	ssshPath, _ := os.Executable()
 	bash := fmt.Sprintf(userBash, ssshPath, ID, historyPath, bashrc)
 	//bash := fmt.Sprintf(`export SSSH=%v; export SSSH_USER=%v; export HIST_FILE_NAME=%v; bash --rcfile %s -c "login fransebas"`, "~/go/src/sssh_server/sssh_server", ID, historyPath, path)
-
-	fmt.Println("bash = " + bash)
 
 	c := exec.Command("bash", "-c", bash)
 

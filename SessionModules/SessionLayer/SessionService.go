@@ -89,7 +89,7 @@ func (s *SessionService) createSession(msgType string, sshSession *SSH.SSHSessio
 	b, _ := CustomUtils.Read(r)
 	sessionID := string(b)
 
-	fmt.Println("Terminal session started " + sessionID)
+	CustomUtils.Print("Terminal session started " + sessionID)
 
 	var terminalSession *TerminalSession
 

@@ -39,7 +39,6 @@ func New(user string) *SFTPRequestServer {
 }
 
 func (s *SFTPRequestServer) Filecmd(r *sftp.Request) error {
-	fmt.Printf("Filecmd method %v \n", r.Method)
 	path := r.Filepath
 	target := r.Target
 

@@ -2,8 +2,8 @@ package TerminalService
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/creack/pty"
+	"sssh_server/Modules/Logging"
 
 	"io"
 	"sssh_server/CustomUtils"
@@ -31,7 +31,7 @@ func (ts *TerminalService) GetHandlers() []*API.RequestHandler {
 			// writer hence this should stop in only half of the cases
 			go func() {
 				_, e := io.Copy(ts.Terminal, r)
-				fmt.Printf("Writing Connection Lost %v", e)
+				CustomUtils.Logger.Printlnf(Logging.INFO, "Writing Connection Lost %v", e)
 			}()
 
 			b := make([]byte, 1024*8)
@@ -54,7 +54,7 @@ func (ts *TerminalService) GetHandlers() []*API.RequestHandler {
 			//}
 
 			_, e = io.Copy(w, &reader)
-			fmt.Printf("Reading Connection Lost %v", e)
+			CustomUtils.Logger.Printlnf(Logging.INFO, "Reading Connection Lost %v", e)
 		},
 		Name: "terminal",
 	}

@@ -156,7 +156,6 @@ func (server *SSSHServer) serve() {
 	// Once a ServerConfig has been configured, connections can be
 	// accepted.
 	url := fmt.Sprintf("%v:%v", "", server.port)
-	fmt.Printf("Serving SSSH in %v", url)
 	listener, err := net.Listen("tcp", url)
 	if err != nil {
 		log.Fatal("failed to listen for connection: ", err)
@@ -208,7 +207,6 @@ func (server *SSSHServer) serve() {
 			go server.AcceptRequests(requests, &channel, &session)
 
 		}
-		fmt.Println("hello")
 	}
 }
 

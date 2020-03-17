@@ -28,8 +28,6 @@ func getConfigFolder(homeArg, pathArg, username string) string {
 		// linux and something else
 		// TODO: validate other OS's
 		dir = fmt.Sprintf("%v/.sssh_server", home)
-		fmt.Println("dir$$$$$$$$$$$$$$$$$$$$$ " + dir)
-		//dir = fmt.Sprintf("%v/etc/ssh_client", home)
 	}
 
 	// Create directory if not exist
@@ -54,9 +52,7 @@ func getVariableFolder(homeArg, pathArg, username string) string {
 	} else {
 		// linux and something else
 		// TODO: validate other OS's
-
 		dir = fmt.Sprintf("%v/.sssh_server", home)
-		fmt.Println("dir$$$$$$$$$$$$$$$$$$$$$ " + dir)
 	}
 
 	// Create directory if not exist
@@ -87,15 +83,12 @@ func removeStartSlash(path string) string {
 }
 
 func New(user string) *DirectoryManager {
-	fmt.Println("User #!@#$!@#$!#@$!@#$   " + user)
-	fmt.Println("pppppppppppp   " + fmt.Sprintf("sudo -u %v echo $HOME", user))
 	var s string
 	if runtime.GOOS == "darwin" {
 		s = CustomUtils.ExecuteCommand(fmt.Sprintf("sudo -u %v echo $HOME", user))
 	} else {
 		s = CustomUtils.ExecuteCommand(fmt.Sprintf(`su - %v -c "echo ~"`, user))
 	}
-	fmt.Println("ssssssssssssssss   " + s)
 	s = s[:len(s)-1]
 	dm := DirectoryManager{
 		UserDirectory:  s,
