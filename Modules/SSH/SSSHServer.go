@@ -169,44 +169,46 @@ func (server *SSSHServer) serve() {
 			log.Fatal("failed to accept incoming connection: ", err)
 		}
 
-		// Before use, a handshake must be performed on the incoming
-		// net.Conn.
-		conn, chans, reqs, err := ssh.NewServerConn(nConn, server.config)
-		if err != nil {
-			//log.Fatal("failed to handshake: ", err)
-			CustomUtils.CheckPrint(err)
-			continue
-		}
-
-		// Create a session for each incoming request
-		session := SSHSession{
-			Conn:     conn,
-			channels: chans,
-			reqs:     reqs,
-		}
-
-		server.NewSessionHandler(&session)
-
-		// The incoming Request channel must be serviced.
-		// Dont know what the fuck does that means but I'm going to accept all request
-		// go AcceptRequests(reqs)
-
-		// Service the incoming Channel channel.
-		for newChannel := range chans {
-			// Channels have a type, depending on the application level
-			// I don't really care about any of that because the client cant issue new channel types
-			// that's why I'm going to implement my own multiplex on top of a channel
-
-			// Accept all channels, we don't care about their type,
-			// Could be bananas for all I know
-			channel, requests, err := newChannel.Accept()
+		go func() {
+			// Before use, a handshake must be performed on the incoming
+			// net.Conn.
+			conn, chans, reqs, err := ssh.NewServerConn(nConn, server.config)
 			if err != nil {
-				log.Fatalf("Could not accept channel: %v", err)
+				//log.Fatal("failed to handshake: ", err)
+				CustomUtils.CheckPrint(err)
+				return
 			}
 
-			go server.AcceptRequests(requests, &channel, &session)
+			// Create a session for each incoming request
+			session := SSHSession{
+				Conn:     conn,
+				channels: chans,
+				reqs:     reqs,
+			}
 
-		}
+			server.NewSessionHandler(&session)
+
+			// The incoming Request channel must be serviced.
+			// Dont know what the fuck does that means but I'm going to accept all request
+			// go AcceptRequests(reqs)
+
+			// Service the incoming Channel channel.
+			for newChannel := range chans {
+				// Channels have a type, depending on the application level
+				// I don't really care about any of that because the client cant issue new channel types
+				// that's why I'm going to implement my own multiplex on top of a channel
+
+				// Accept all channels, we don't care about their type,
+				// Could be bananas for all I know
+				channel, requests, err := newChannel.Accept()
+				if err != nil {
+					log.Fatalf("Could not accept channel: %v", err)
+				}
+
+				go server.AcceptRequests(requests, &channel, &session)
+
+			}
+		}()
 	}
 }
 

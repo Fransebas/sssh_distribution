@@ -6,6 +6,7 @@ var modePtr = flag.String("mode", "server", `Select a mode for the program, avai
 	server : running the sssh server
 	prompt : system only function (the user shouldn't use it), it send a request to the server indicating the user typed a command, it should be use it conjunction with userid 
 	keygen : generate a new key
+	stop : stop running instance
 	fingerprint : use to get the associated fingerprint with a running server or a given public key file
 `)
 
