@@ -98,6 +98,8 @@ func (c *Configuration) initPrompt() {
 }
 
 func (c *Configuration) Init() {
+	c.Config = *configPtr
+
 	flag.Parse()
 	c.Mode = *modePtr
 	c.UserId = *userIdPtr
@@ -105,7 +107,7 @@ func (c *Configuration) Init() {
 	c.RPCPort = *rpcPortPtr
 	c.KeyFile = *keyFile
 	c.Port = *portPtr
-	c.Config = *configPtr
+
 	c.initKeygen()
 	c.initFingerprint()
 	c.initPrompt()
@@ -116,14 +118,13 @@ func (c *Configuration) Init() {
 func ReadFileIfExist(c *Configuration) {
 
 	t, e := toml.LoadFile(c.Config)
-
 	if e != nil {
 		// do nothing
 		CustomUtils.CheckPrint(e)
 	} else {
-		// Load Config
-		e := t.Unmarshal(c)
-		// if it fails we cry and do nothing
-		CustomUtils.CheckPrint(e)
+		c.Mode = t.GetDefault("Mode", c.Mode).(string)
+		c.HTTPPort = t.GetDefault("HTTPPort", c.HTTPPort).(int)
+		c.Port = t.GetDefault("Port", c.Port).(int)
+		c.KeyFile = t.GetDefault("KeyFile", c.Port).(string)
 	}
 }
