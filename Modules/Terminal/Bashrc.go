@@ -17,7 +17,8 @@ createIfNotExist(){
 #history -anrw $HIST_FILE_NAME
 
 createIfNotExist ~/.bashrc
-. ~/.bashrc
+[[ -r ~/.bashrc ]] && . ~/.bashrc
+[[ -r ~/.profile ]] && . ~/.profile
 
 # Colors in the terminal
 
