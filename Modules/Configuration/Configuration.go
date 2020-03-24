@@ -1,6 +1,11 @@
 package Configuration
 
-import "flag"
+import (
+	"flag"
+	"github.com/pelletier/go-toml"
+	"sssh_server/CustomUtils"
+	"sssh_server/Modules/Logging"
+)
 
 var modePtr = flag.String("mode", "server", `Select a mode for the program, available modes are: 
 	server : running the sssh server
@@ -9,6 +14,8 @@ var modePtr = flag.String("mode", "server", `Select a mode for the program, avai
 	stop : stop running instance
 	fingerprint : use to get the associated fingerprint with a running server or a given public key file
 `)
+
+var configPtr = flag.String("config", "/etc/sssh.conf", "Location fo the configuration file")
 
 // Internal use flags (prompt)
 var userIdPtr = flag.String("userid", "error", "Send the id of the user should be used with the mode flag set to prompt")
@@ -70,6 +77,7 @@ type Configuration struct {
 	KeygenConfig      KeygenConfig
 	FingerprintConfig FingerprintConfig
 	PromptConfig      PromptConfig
+	Config            string
 }
 
 func (c *Configuration) initKeygen() {
@@ -98,7 +106,28 @@ func (c *Configuration) Init() {
 	c.RPCPort = *rpcPortPtr
 	c.KeyFile = *keyFile
 	c.Port = *portPtr
+	c.Config = *configPtr
 	c.initKeygen()
 	c.initFingerprint()
 	c.initPrompt()
+
+	ReadFileIfExist(c)
+
+	CustomUtils.Logger.Println(Logging.INFO, c.Config)
+	CustomUtils.Logger.Println(Logging.INFO, c.KeyFile)
+}
+
+func ReadFileIfExist(c *Configuration) {
+
+	t, e := toml.LoadFile(c.Config)
+
+	if e != nil {
+		// do nothing
+		CustomUtils.CheckPrint(e)
+	} else {
+		// Load Config
+		e := t.Unmarshal(c)
+		// if it fails we cry and do nothing
+		CustomUtils.CheckPrint(e)
+	}
 }

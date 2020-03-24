@@ -9,4 +9,8 @@ cp ./sssh_server /usr/local/bin/sssh_server
 cp ./ssshserver /etc/init.d/ssshserver
 cp ./sssh_server.service /lib/systemd/system/sssh_server.service
 
+mkdir /etc/sssh
+
+./sssh_server -mode=keygen -filename=/etc/sssh/rsa_host
+
 echo "Installation finished"

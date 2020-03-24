@@ -1,1 +1,9 @@
-sudo: sssh_server: command not found
+panic: listen tcp :2000: bind: address already in useServer stop
+
+goroutine 1 [running]:
+sssh_server/CustomUtils.CheckPanic(0x460b6a0, 0xc000214280, 0x453901f, 0xb)
+	/Users/fransebas/go/src/sssh_server/CustomUtils/Util.go:19 +0x138
+main.server(0x4535e47, 0x6, 0x4534c05, 0x5, 0x7d0, 0x8ae, 0x7d1, 0xc000028380, 0x12, 0x0, ...)
+	/Users/fransebas/go/src/sssh_server/main.go:119 +0x424
+main.main()
+	/Users/fransebas/go/src/sssh_server/main.go:133 +0x2b0
