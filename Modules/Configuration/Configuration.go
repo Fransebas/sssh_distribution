@@ -4,7 +4,6 @@ import (
 	"flag"
 	"github.com/pelletier/go-toml"
 	"sssh_server/CustomUtils"
-	"sssh_server/Modules/Logging"
 )
 
 var modePtr = flag.String("mode", "server", `Select a mode for the program, available modes are: 
@@ -112,9 +111,6 @@ func (c *Configuration) Init() {
 	c.initPrompt()
 
 	ReadFileIfExist(c)
-
-	CustomUtils.Logger.Println(Logging.INFO, c.Config)
-	CustomUtils.Logger.Println(Logging.INFO, c.KeyFile)
 }
 
 func ReadFileIfExist(c *Configuration) {
