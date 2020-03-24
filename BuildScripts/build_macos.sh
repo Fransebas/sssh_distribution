@@ -4,4 +4,6 @@
 
 mkdir builds/macos$1
 
+cp -r builds/macos/* builds/macos$1/
+
 go build -o "builds/macos$1/sssh_server"

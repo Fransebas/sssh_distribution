@@ -160,6 +160,10 @@ func createFiles(bashrc, username string) {
 	if _, err := os.Stat(bashrcPath); err == nil {
 		// path/to/whatever exists
 
+		// TODO: this updates the file, maybe there is a better way
+		CustomUtils.ExecuteCommand(fmt.Sprintf(`sudo -u %v touch "%v"`, username, bashrcPath))
+		err = ioutil.WriteFile(bashrcPath, []byte(Bashrc), 0755)
+		CustomUtils.CheckPanic(err, "unable to create bashrc")
 	} else if os.IsNotExist(err) {
 		// path/to/whatever does *not* exist
 
