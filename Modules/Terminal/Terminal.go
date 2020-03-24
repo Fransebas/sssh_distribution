@@ -3,7 +3,6 @@ package Terminal
 import (
 	"fmt"
 	"github.com/creack/pty"
-	"golang.org/x/crypto/ssh/terminal"
 	"io"
 	"io/ioutil"
 	"log"
@@ -26,7 +25,6 @@ Safe for copy, all types are pointers
 type Terminal struct {
 	ptmx      *os.File
 	ch        *chan os.Signal
-	state     *terminal.State
 	resizeMux *sync.Mutex
 	user      *SSH.User
 	buffer    *CustomUtils.FixedDeque
@@ -118,9 +116,9 @@ For now this function initialize the terminal and checks continuosly if the scre
 already because the socket doesn't send that info yet
 */
 func (t *Terminal) Run() {
-	var err error
-	t.state, err = terminal.MakeRaw(0)
-	CustomUtils.CheckPanic(err, "Couldn't make terminal")
+	//var err error
+	//t.state, err = terminal.MakeRaw(0)
+	//CustomUtils.CheckPanic(err, "Couldn't make terminal")
 
 	var winSize pty.Winsize
 	winSize.X = 24
@@ -154,7 +152,7 @@ func (t *Terminal) Close() {
 	// Best effort.// Set stdin in raw mode.
 
 	defer func() { _ = t.ptmx.Close() }()
-	defer func() { _ = terminal.Restore(0, t.state) }() // Best effort.
+	//defer func() { _ = terminal.Restore(0, t.state) }() // Best effort.
 }
 
 func createFiles(bashrc, username string) {
