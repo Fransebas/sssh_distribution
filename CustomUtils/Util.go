@@ -28,7 +28,6 @@ func CheckPrint(e error) {
 	if e != nil {
 		//debug.PrintStack()
 		Logger.Printlnf(Logging.ERROR, "%v", e)
-
 	}
 }
 

@@ -16,9 +16,10 @@ createIfNotExist(){
 
 #history -anrw $HIST_FILE_NAME
 
-createIfNotExist ~/.bashrc
+[[ -r ~/.bash_profile ]] && . ~/.bash_profile
 [[ -r ~/.bashrc ]] && . ~/.bashrc
 [[ -r ~/.profile ]] && . ~/.profile
+
 
 # Colors in the terminal
 
@@ -43,7 +44,7 @@ export HISTCONTROL=ignorespace ; history -d 1
 $SSSH -mode=prompt -userid=$SSSH_USER -history="$(history)" -pwd="$HOME"
 #curl --data "$(history)" http://localhost:2000/newcommand?SSSH_USER=$SSSH_USER &> /dev/null
 
-export PROMPT_COMMAND='& $SSSH -mode=prompt -userid=$SSSH_USER -history="$(history 1)" -pwd="$(pwd)"'
+export PROMPT_COMMAND='$SSSH -mode=prompt -userid=$SSSH_USER -history="$(history 1)" -pwd="$(pwd)" &> /dev/null & disown'
 
  cd
 `

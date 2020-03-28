@@ -12,6 +12,10 @@ cp ./sssh.conf /etc/sssh.conf
 
 mkdir /etc/sssh
 
-./sssh_server -mode=keygen -filename=/etc/sssh/rsa_host
+KEYFILE=/etc/sssh/rsa_host
+
+if [[ ! -f "$KEYFILE" ]]; then
+    ./sssh_server -mode=keygen -filename=${KEYFILE}
+fi
 
 echo "Installation finished"
