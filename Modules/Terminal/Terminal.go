@@ -163,14 +163,14 @@ func createFiles(bashrc, username string) {
 		// TODO: this updates the file, maybe there is a better way
 		CustomUtils.ExecuteCommand(fmt.Sprintf(`sudo -u %v touch "%v"`, username, bashrcPath))
 		err = ioutil.WriteFile(bashrcPath, []byte(Bashrc), 0755)
-		CustomUtils.CheckPanic(err, "unable to create bashrc")
+		CustomUtils.CheckPrint(err)
 	} else if os.IsNotExist(err) {
 		// path/to/whatever does *not* exist
 
 		// This will create the file for the user with the right permissions
 		CustomUtils.ExecuteCommand(fmt.Sprintf(`sudo -u %v touch "%v"`, username, bashrcPath))
 		err = ioutil.WriteFile(bashrcPath, []byte(Bashrc), 0755)
-		CustomUtils.CheckPanic(err, "unable to create bashrc")
+		CustomUtils.CheckPrint(err)
 
 	} else {
 		// Schrodinger: file may or may not exist. See err for details.
