@@ -54,14 +54,6 @@ func InitTerminal(id, historyPath, bashrc, username string) *Terminal {
 	t.buffer = CustomUtils.New(1000000) /// 1000000 is 1 MB maybe I should use less
 	t.resizeMux = new(sync.Mutex)
 
-	// debug
-	var err error
-	//t.tmp, err = os.Create("tmp2")
-	if err != nil {
-		panic(err)
-	}
-	// end
-
 	// The file base path is the Assets, maybe there is a better place like /etc or something
 	//basePath, err := filepath.Abs("Assets/")
 	//CustomUtils.CheckPanic(err, "Could not create history file for the session")
@@ -202,7 +194,7 @@ func initInteractive(ID, historyPath, bashrc, username string) (*os.File, io.Rea
 	// Start the command with a pty.
 
 	ptmx, err := pty.Start(c)
-	CustomUtils.CheckPanic(err, "Could not initialize TerminalService")
+	CustomUtils.CheckPrint(err)
 
 	return ptmx, ptmx, ptmx
 }
