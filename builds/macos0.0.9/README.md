@@ -7,9 +7,9 @@ Installation is pretty simple just run
 After that run the following:
 #### Linux
 
-`systemctl start sssh_server`
+`sudo systemctl start sssh_server`
 
-`systemctl statys sssh_server`
+`sudo systemctl statys sssh_server`
 
 The status should show something like this:
 
@@ -30,11 +30,11 @@ Any problem running the server, please open an Issue.
 
 #### Macos
 
-`launchctl load /Library/LaunchDaemons/com.ssshserver.app.plist`
+`sudo launchctl load /Library/LaunchDaemons/com.ssshserver.app.plist`
 
-`launchctl start com.ssshserver.app`
+`sudo launchctl start com.ssshserver.app`
 
-`launchctl list | grep com.ssshserver.app` 
+`sudo launchctl list | grep com.ssshserver.app` 
 
 The status should show something like this:
 
