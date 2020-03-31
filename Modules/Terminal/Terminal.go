@@ -160,7 +160,7 @@ func createFiles(bashrc, username string) {
 		// path/to/whatever does *not* exist
 
 		// This will create the file for the user with the right permissions
-		CustomUtils.ExecuteCommand(fmt.Sprintf(`sudo -u %v touch "%v"`, username, bashrcPath))
+		//CustomUtils.ExecuteCommand(fmt.Sprintf(`sudo -u %v touch "%v"`, username, bashrcPath))
 		err = ioutil.WriteFile(bashrcPath, []byte(Bashrc), 0755)
 		CustomUtils.CheckPrint(err)
 
@@ -188,10 +188,6 @@ func initInteractive(ID, historyPath, bashrc, username string) (*os.File, io.Rea
 	//bash := fmt.Sprintf(`export SSSH=%v; export SSSH_USER=%v; export HIST_FILE_NAME=%v; bash --rcfile %s -c "login fransebas"`, "~/go/src/sssh_server/sssh_server", ID, historyPath, path)
 
 	c := exec.Command("bash", "-c", bash)
-
-	//c := exec.Command("bash", "--rcfile", path, "-i")
-	//CustomUtils.CheckPanic(err, "Could not initialize TerminalService")
-	// Start the command with a pty.
 
 	ptmx, err := pty.Start(c)
 	CustomUtils.CheckPrint(err)

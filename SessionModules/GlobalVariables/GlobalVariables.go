@@ -3,6 +3,7 @@ package GlobalVariables
 import (
 	"encoding/json"
 	"os"
+	"sssh_server/CustomUtils"
 	"sssh_server/Modules/SSH"
 	"sssh_server/SessionModules/API"
 	"strings"
@@ -35,9 +36,7 @@ func (g *GlobalVariables) getVariables() string {
 	}
 	b, e := json.Marshal(variables)
 
-	if e != nil {
-		panic(e)
-	}
+	CustomUtils.CheckPrint(e)
 	return string(b)
 }
 

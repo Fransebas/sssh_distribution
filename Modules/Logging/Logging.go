@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"runtime/debug"
 	"time"
 )
 
@@ -102,7 +103,12 @@ func (l *Logging) Println(level int, str string) {
 	if level == INFO {
 		l.print(str, "INFO", l.infoFile)
 	} else {
-		l.print(str, "ERROR", l.errorFile)
+		stack := debug.Stack()
+		strDebugg := ""
+		for _, s := range stack {
+			strDebugg += string(s)
+		}
+		l.print(str+strDebugg, "ERROR", l.errorFile)
 	}
 }
 

@@ -8,5 +8,12 @@
 		<string>/usr/local/bin/sssh_server</string>
 		<key>RunAtLoad</key>
 		<true/>
+
+        <key>StandardOutPath</key>
+        <string>/tmp/com.ssshserver.app.out</string>
+        <key>StandardErrorPath</key>
+        <string>/tmp/com.ssshserver.app.err</string>
+
+
 	</dict>
 </plist>

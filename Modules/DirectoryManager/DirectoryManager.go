@@ -2,6 +2,7 @@ package DirectoryManager
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
 	"runtime"
 	"sssh_server/CustomUtils"
 )
@@ -89,7 +90,13 @@ func New(user string) *DirectoryManager {
 	} else {
 		s = CustomUtils.ExecuteCommand(fmt.Sprintf(`su - %v -c "echo ~"`, user))
 	}
-	s = s[:len(s)-1]
+
+	if len(s) > 0 {
+		s = s[:len(s)-1]
+	} else {
+		CustomUtils.CheckPrint(errors.New("Something is really bad user : " + user + " ."))
+	}
+
 	dm := DirectoryManager{
 		UserDirectory:  s,
 		ConfigFolder:   getConfigFolder(s, "", user),
