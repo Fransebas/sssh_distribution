@@ -2,7 +2,7 @@ package DirectoryManager
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
+	"os/user"
 	"runtime"
 	"sssh_server/CustomUtils"
 )
@@ -83,24 +83,13 @@ func removeStartSlash(path string) string {
 	return path
 }
 
-func New(user string) *DirectoryManager {
-	var s string
-	if runtime.GOOS == "darwin" {
-		s = CustomUtils.ExecuteCommand(fmt.Sprintf("sudo -u %v echo $HOME", user))
-	} else {
-		s = CustomUtils.ExecuteCommand(fmt.Sprintf(`su - %v -c "echo ~"`, user))
-	}
-
-	if len(s) > 0 {
-		s = s[:len(s)-1]
-	} else {
-		CustomUtils.CheckPrint(errors.New("Something is really bad user : " + user + " ."))
-	}
-
+func New(username string) *DirectoryManager {
+	usr, _ := user.Lookup(username)
+	s := usr.HomeDir
 	dm := DirectoryManager{
 		UserDirectory:  s,
-		ConfigFolder:   getConfigFolder(s, "", user),
-		VariableFolder: getVariableFolder(s, "", user),
+		ConfigFolder:   getConfigFolder(s, "", username),
+		VariableFolder: getVariableFolder(s, "", username),
 	}
 	return &dm
 }
