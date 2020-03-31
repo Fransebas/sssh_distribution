@@ -49,6 +49,7 @@ After that run the following:
 #### Linux
 
 `systemctl start sssh_server`
+
 `systemctl statys sssh_server`
 
 The status should show something like this:
@@ -66,10 +67,14 @@ The status should show something like this:
 mar 30 22:39:57 fransebasUbuntu systemd[1]: Started Service for sssh server.
 ```
 
+Any problem running the server, please open an Issue.
+
 #### Macos
 
 `launchctl load /Library/LaunchDaemons/com.ssshserver.app.plist`
+
 `launchctl start com.ssshserver.app`
+
 `launchctl list | grep com.ssshserver.app` 
 
 The status should show something like this:
@@ -78,6 +83,7 @@ The status should show something like this:
 
 If you don't see any output that means that the service is not running.
 
+Any problem running the server, please open an Issue.
 
 ## What does the installation script does?
 
@@ -111,3 +117,4 @@ You can specify the location of the keys:
 
 The client currently only supports Unix-like systems and Windows 10 (<= 1809), it has been tested in macos (10.14.6), Ubuntu (16), Windows (latest version on 3/14/2020). Any compatibility problem please reported it in the issue section.
 
+If you find a Unix system wher the client doesn't work, please open an Issue to fix it.
