@@ -153,7 +153,7 @@ func createFiles(bashrc, username string) {
 		// path/to/whatever exists
 
 		// TODO: this updates the file, maybe there is a better way
-		CustomUtils.ExecuteCommand(fmt.Sprintf(`sudo -u %v touch "%v"`, username, bashrcPath))
+		//CustomUtils.ExecuteCommand(fmt.Sprintf(`sudo -u %v touch "%v"`, username, bashrcPath))
 		err = ioutil.WriteFile(bashrcPath, []byte(Bashrc), 0755)
 		CustomUtils.CheckPrint(err)
 	} else if os.IsNotExist(err) {
