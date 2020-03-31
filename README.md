@@ -28,57 +28,83 @@ The idea for the SSSH protocol is to create a GUI for every Unix utility that wo
 As a dummy example to illustrate this idea, let's image a Plug-in that has a simple GUI to control `chmod` which is not a hard command to use but this GUI could help people that don't know by memory all the modifier values for `chmod` also it could help people that use that command in a regular basis by making it faster to use (maybe remembering the last used modifiers) and also having a file selector to quickly select the file to apply the modifiers.
 
 # Index
+
 * [Server](#server)
-  * [Running the server](#running-the-server)
-  * [Creating an RSA key](#creating-an-rsa-key)
-  * [Getting the key fingerprint](#getting-the-key-fingerprint)
+  * [Instalation](#instalation)
+     * [Linux](#linux)
+     * [Macos](#macos)
+  * [What does the installation script does?](#what-does-the-installation-script-does)
+  * [Alternative use](#alternative-use)
 * [Client](#client)
 
 # Server
 
-The server currently only supports Unix-like systems, it has been tested in macos (10.14.6), Ubuntu (16), Debian Jessy (raspberry pi). Any compatibility issue with a different Unix system, please open an issue.
-## Running the server
+## Instalation
 
-Note: I'm working on the right way to run the server as a service on boot but in the meantime, you need to run it manually.
+Installation is pretty simple just run
 
-Because the server should keep open it's recommended to run it using a session manager program like `tmux` or `screen`, or using `&` to run it as a separate process like this (for multiuser access the server should run as sudo):
+`sudo ./install.sh`
 
-`& sudo sssh_server`
+After that run the following:
+#### Linux
 
-The current flags for the `server` mode are:
-  - `keyfile` path for the RSA key to use to authenticate the server, the default value is `./id_rsa`
-  - `port` Port for the sssh server, default 2222
-  
-Example:
+`systemctl start sssh_server`
+`systemctl statys sssh_server`
 
-`& sudo sssh_server -keyfile=/etc/ssh/id_rsa -port=22` With this flags, the commad will search for the auth key in the directory `/etc/ssh/id_rsa` and use the port 22 for comunication.
+The status should show something like this:
 
-## Creating an RSA key
+```
+● sssh_server.service - Service for sssh server
+   Loaded: loaded (/lib/systemd/system/sssh_server.service; static; vendor preset: enabled)
+   Active: active (running) since Mon 2020-03-30 22:39:57 CST; 5s ago
+ Main PID: 19346 (sssh_server)
+    Tasks: 7 (limit: 4496)
+   Memory: 3.3M
+   CGroup: /system.slice/sssh_server.service
+           └─19346 /usr/local/bin/sssh_server
 
-Note: don't confuse this key with the user authentication key, this key is to trust the server.
+mar 30 22:39:57 fransebasUbuntu systemd[1]: Started Service for sssh server.
+```
 
-Currently, the only available key type is RSA, you can use the existing key under `/etc/ssh` or create a new key using:
+#### Macos
 
-`sssh_server -mode=keygen` 
+`launchctl load /Library/LaunchDaemons/com.ssshserver.app.plist`
+`launchctl start com.ssshserver.app`
+`launchctl list | grep com.ssshserver.app` 
 
-This will generate two files in the current directory `id_rsa` which is the private key and `id_rsa.pub` the public key that you can put in your `know_host`.
+The status should show something like this:
 
-The current flags for the `keygen` mode are:
+`-	2	com.ssshserver.app`
 
-- `filename` The filename of the generated key i.e. `Filename` and `Filename.pub`
-- `type` For the key type, currently only `rsa` type is supported
+If you don't see any output that means that the service is not running.
 
 
-## Getting the key fingerprint
+## What does the installation script does?
 
-In order to verify the identity of your server, you'll need to have physical access to it and generate the fingerprint of your key with the following command:
 
-`sssh_server -mode=fingerprint -file=/keylocation`
+This will move the executable `sssh_server` to  `/usr/local/bin/sssh_server`
 
-The current flags for the `fingerprint` mode are:
+Move the sssh server configuration file `sssh.conf` to `/etc/sssh.conf`
 
-- `file` The location of your key, the default value is the current directory i.e. `./id_rsa` and `./id_rsa.pub`
-- `server` The URL for the server (use this only for debugging, this is not secure for remote servers), default `localhost`
+Move the sssh_server.service to `/lib/systemd/system/sssh_server.service` or in mac `com.ssshserver.app.plist` to `/Library/LaunchDaemons/com.ssshserver.app.plist`
+
+Then it will crete a rsa key to be use to recognize your host machine, it will be located in `/etc/sssh/rsa_host` .
+You could also wish to use the host keys already in you computer, they are located in `/etc/ssh/...` to do so, modify the conf file.
+
+
+## Alternative use
+
+If you do not wish to use the installer, you can simply run
+
+`sudo ./sssh_server`
+
+But you need to have a rsa key, which you can create with the OpenSSH suite or using the `sssh_server` like this:
+
+`./sssh_server -mode=keygen`
+
+You can specify the location of the keys:
+
+`sudo ./sssh_server -keyfile=./id_rsa`
 
 
 # Client
