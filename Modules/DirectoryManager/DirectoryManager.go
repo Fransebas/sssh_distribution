@@ -2,9 +2,11 @@ package DirectoryManager
 
 import (
 	"fmt"
+	"os"
 	"os/user"
 	"runtime"
 	"sssh_server/CustomUtils"
+	"sssh_server/Modules/Logging"
 )
 
 type DirectoryManager struct {
@@ -31,9 +33,13 @@ func getConfigFolder(homeArg, pathArg, username string) string {
 		dir = fmt.Sprintf("%v/.sssh_server", home)
 	}
 
-	// Create directory if not exist
-	// It is created like this to avoid permissions errors
-	CustomUtils.ExecuteCommand(fmt.Sprintf(`sudo -u %v mkdir "%v"`, username, dir))
+	CustomUtils.Logger.Println(Logging.INFO, fmt.Sprintf("%v/%v", dir, path))
+
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		// Create directory if not exist
+		// It is created like this to avoid permissions errors
+		CustomUtils.ExecuteCommand(fmt.Sprintf(`sudo -u %v mkdir "%v"`, username, dir))
+	}
 
 	return removeEndSlash(fmt.Sprintf("%v/%v", dir, path))
 }
@@ -56,9 +62,12 @@ func getVariableFolder(homeArg, pathArg, username string) string {
 		dir = fmt.Sprintf("%v/.sssh_server", home)
 	}
 
-	// Create directory if not exist
-	// It is created like this to avoid permissions errors
-	CustomUtils.ExecuteCommand(fmt.Sprintf(`sudo -u %v mkdir "%v"`, username, dir))
+	CustomUtils.Logger.Println(Logging.INFO, fmt.Sprintf("%v/%v", dir, path))
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		// Create directory if not exist
+		// It is created like this to avoid permissions errors
+		CustomUtils.ExecuteCommand(fmt.Sprintf(`sudo -u %v mkdir "%v"`, username, dir))
+	}
 
 	return removeEndSlash(fmt.Sprintf("%v/%v", dir, path))
 }
