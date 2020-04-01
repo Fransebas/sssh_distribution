@@ -10,6 +10,8 @@ cp ./ssshserver /etc/init.d/ssshserver
 cp ./sssh_server.service /lib/systemd/system/sssh_server.service
 cp ./sssh.conf /etc/sssh.conf
 
+sudo systemctl enable sssh_server
+
 mkdir /etc/sssh
 
 KEYFILE=/etc/sssh/rsa_host
