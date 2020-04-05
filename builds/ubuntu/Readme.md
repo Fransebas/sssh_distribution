@@ -38,7 +38,7 @@ Any problem running the server, please open an Issue.
 
 The status should show something like this:
 
-`-	2	com.ssshserver.app`
+`15512   -15     com.ssshserver.app`
 
 If you don't see any output that means that the service is not running.
 
