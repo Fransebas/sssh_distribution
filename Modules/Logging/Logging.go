@@ -13,6 +13,7 @@ import (
 const (
 	INFO  = iota
 	ERROR = iota
+	DEBUG = iota
 )
 
 type Logging struct {
@@ -102,6 +103,8 @@ func (l *Logging) print(str string, level string, file *os.File) {
 func (l *Logging) Println(level int, str string) {
 	if level == INFO {
 		l.print(str, "INFO", l.infoFile)
+	} else if level == DEBUG {
+		l.print(str, "DEBUG", l.infoFile)
 	} else {
 		stack := debug.Stack()
 		strDebugg := ""

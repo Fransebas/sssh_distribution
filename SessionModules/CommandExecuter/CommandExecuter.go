@@ -8,9 +8,11 @@ import (
 )
 
 type CommandExecuter struct {
+	user string
 }
 
 func (cme *CommandExecuter) ExecuteCommand(cmmnd string) string {
+	// TODO: Important!!! usse the user to prevent a breach
 	//fmt.Println("comnd : " + cmmnd)
 	// s := strings.Split(cmmnd, " ")
 	// c := exec.Command(s[0], s[1:]...)
@@ -22,7 +24,7 @@ func (cme *CommandExecuter) ExecuteCommand(cmmnd string) string {
 }
 
 func (cme *CommandExecuter) OnNewSession(session API.TerminalSessionInterface) {
-
+	cme.user = session.GetUsername()
 }
 func (cme *CommandExecuter) OnNewConnection(sshSession *SSH.SSHSession) {
 

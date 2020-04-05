@@ -7,6 +7,7 @@ import (
 	"sssh_server/SessionModules/EchoService"
 	"sssh_server/SessionModules/GlobalVariables"
 	"sssh_server/SessionModules/History"
+	"sssh_server/SessionModules/ProcessStatus"
 	"sssh_server/SessionModules/TerminalService"
 )
 
@@ -17,6 +18,7 @@ var rawServices []interface{} = []interface{}{
 	new(CommandExecuter.CommandExecuter),
 	new(EchoService.EchoService),
 	new(GlobalVariables.GlobalVariables),
+	new(ProcessStatus.ProcessStatusModule),
 }
 
 // List of all the available services

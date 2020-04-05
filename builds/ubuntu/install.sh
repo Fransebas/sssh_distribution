@@ -16,7 +16,7 @@ mkdir /etc/sssh
 
 KEYFILE=/etc/sssh/rsa_host
 
-if [[ ! -f ${KEYFILE} ]]; then
+if [[ ! -f "$KEYFILE" ]]; then
     ./sssh_server -mode=keygen -filename=${KEYFILE}
 fi
 
