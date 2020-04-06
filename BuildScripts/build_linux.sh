@@ -6,8 +6,8 @@ if [[ $# -eq 1 ]]
     exit
 fi
 
-export VERSION = ${1}
-export FOLDER = ${2}
+export VERSION=${1}
+export FOLDER=${2}
 
 
 mkdir ${FOLDER}/usr/local/bin
