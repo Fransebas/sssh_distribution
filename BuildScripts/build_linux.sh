@@ -3,6 +3,8 @@
 if [[ $# -eq 2 ]]
   then
     echo "No name supplied"
+    echo ${1}
+    echo ${2}
     exit
 fi
 
