@@ -10,10 +10,10 @@ export VERSION=${1}
 export FOLDER=${2}
 
 
-mkdir ${FOLDER}/usr/local/bin
-mkdir ${FOLDER}/etc/init.d
-mkdir ${FOLDER}/lib/systemd/system
-mkdir ${FOLDER}/etc
+mkdir -p ${FOLDER}/usr/local/bin
+mkdir -p ${FOLDER}/etc/init.d
+mkdir -p ${FOLDER}/lib/systemd/system
+mkdir -p ${FOLDER}/etc
 
 
 
