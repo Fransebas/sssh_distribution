@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 
-if [[ $# -eq 2 ]]
+if [[ $# -eq 1 ]]
   then
     echo "No name supplied"
-    echo ${1}
-    echo ${2}
     exit
 fi
 
