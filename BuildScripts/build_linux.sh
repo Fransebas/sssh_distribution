@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-##
 if [[ $# -eq 2 ]]
   then
     echo "No name supplied"
@@ -9,7 +8,6 @@ fi
 
 export VERSION = ${1}
 export FOLDER = ${2}
-
 
 
 mkdir ${FOLDER}/usr/local/bin
