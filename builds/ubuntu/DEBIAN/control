@@ -1,0 +1,10 @@
+Package: sssh-server
+Version: 0.0.16
+Architecture: all
+Essential: no
+Section: misc
+Priority: optional
+Depends:
+Maintainer: Sebastian Franco
+Installed-Size: 13000
+Description: Server for sssh
