@@ -15,7 +15,7 @@ func init() {
 
 func CheckPanic(e error, msg string) {
 	if e != nil {
-		Logger.Printlnf(Logging.ERROR, "%v", e)
+		Logger.Printlnf(Logging.ERROR, "%v", e.Error()+":"+msg)
 		panic(e.Error() + msg)
 	}
 }

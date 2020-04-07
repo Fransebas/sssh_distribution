@@ -189,7 +189,6 @@ func (s *SessionService) ChannelHandler() {
 					CustomUtils.CheckPrint(fmt.Errorf("Message type " + msgType + " doesn't exist"))
 				}
 			} else if mode == "channel" {
-
 				if handler, ok := terminalSession.HandlersMap[msgType]; ok {
 					handler(w, r)
 				} else {

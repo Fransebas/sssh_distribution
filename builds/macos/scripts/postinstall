@@ -2,22 +2,13 @@
 chmod -R 755 /usr/local/bin/sssh_server.script.sh
 chmod -R 755 /Library/LaunchDaemons/com.ssshserver.app.plist
 
-echo "a" > /tmp/com.ssshserver.app.out
-
-mkdir /tmp/a
-
 KEYFILE=/etc/sssh/rsa_host
 
+mkdir -p /etc/sssh
+
 if [ ! -f ${KEYFILE} ]; then
-    ./sssh_server -mode=keygen -filename=${KEYFILE}
+    /usr/local/bin/sssh_server -mode=keygen -filename=${KEYFILE} >> /tmp/com.ssshserver.app.out
 fi
 
-mkdir /tmp/b
-
-echo "b" > /tmp/com.ssshserver.app.out
-
 sudo launchctl load /Library/LaunchDaemons/com.ssshserver.app.plist
-
-echo "c" > /tmp/com.ssshserver.app.out
-
-exit 0 # all good
+exit 0

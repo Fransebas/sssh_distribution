@@ -1,4 +1,2 @@
 #!/bin/sh
-echo "a" > /tmp/my_preinstall
-
 exit 0 # all good

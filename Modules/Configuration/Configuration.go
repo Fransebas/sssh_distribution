@@ -1,6 +1,7 @@
 package Configuration
 
 import (
+	"encoding/json"
 	"flag"
 	"github.com/pelletier/go-toml"
 	"sssh_server/CustomUtils"
@@ -113,6 +114,11 @@ func (c *Configuration) Init() {
 	c.initPrompt()
 
 	ReadFileIfExist(c)
+}
+
+func (c *Configuration) String() string {
+	b, _ := json.Marshal(c)
+	return string(b)
 }
 
 func ReadFileIfExist(c *Configuration) {

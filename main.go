@@ -97,7 +97,7 @@ var httpServer http.Server
 
 func server(config Configuration.Configuration) {
 	//r := mux.NewRouter()
-	CustomUtils.Logger.Printlnf(Logging.INFO, "Serving at localhost:%v", config.HTTPPort)
+	CustomUtils.Logger.Printlnf(Logging.INFO, "Serving at localhost:%v", config.Port)
 
 	mux := http.NewServeMux()
 	sessionService = SessionLayer.Constructor(config.KeyFile, config.Port)
@@ -124,18 +124,25 @@ func main() {
 	config = Configuration.Configuration{}
 	config.Init()
 
+	CustomUtils.Logger.Println(Logging.INFO, fmt.Sprint(os.Args))
+	CustomUtils.Logger.Println(Logging.INFO, config.String())
+
 	rpc = RPC.New(config.RPCPort)
 	for _, service := range SessionLayer.CommandServices {
 		rpc.AddService(service)
 	}
 
 	if config.Mode == "server" {
+		CustomUtils.Logger.Println(Logging.INFO, "1")
 		server(config)
 	} else if config.Mode == "prompt" {
+		CustomUtils.Logger.Println(Logging.INFO, "2")
 		Programs.Prompt(config)
 	} else if config.Mode == "keygen" {
+		CustomUtils.Logger.Println(Logging.INFO, "3")
 		Programs.Keygen(config)
 	} else if config.Mode == "fingerprint" {
+		CustomUtils.Logger.Println(Logging.INFO, "4")
 		Programs.Fingerprint(config)
 	} else if config.Mode == "stop" {
 		Programs.Stop(config)
