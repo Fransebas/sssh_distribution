@@ -1,6 +1,0 @@
-[Unit]
-Description=Service for sssh server
-
-[Service]
-Type=simple
-ExecStart=/usr/local/bin/sssh_server
