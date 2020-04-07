@@ -7,7 +7,7 @@ sudo systemctl enable sssh_server
 KEYFILE=/etc/sssh/rsa_host
 
 if [ ! -f "$KEYFILE" ]; then
-    ./sssh_server -mode=keygen -filename=${KEYFILE}
+    /usr/local/bin/sssh_server -mode=keygen -filename=${KEYFILE}
 fi
 
 sudo systemctl start sssh_server
