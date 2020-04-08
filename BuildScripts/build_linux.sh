@@ -17,7 +17,7 @@ mkdir -p ${FOLDER}/etc
 
 
 go build -o ${FOLDER}/usr/local/bin/sssh_server
-cp builds/ubuntu/ssshserver ${FOLDER}/etc/init.d/ssshserver
+#cp builds/ubuntu/ssshserver ${FOLDER}/etc/init.d/ssshserver
 cp builds/ubuntu/sssh_server.service ${FOLDER}/lib/systemd/system/sssh_server.service
 cp builds/ubuntu/sssh.conf ${FOLDER}/etc/sssh.conf
 
