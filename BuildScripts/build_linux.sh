@@ -24,6 +24,7 @@ cp builds/ubuntu/sssh.conf ${FOLDER}/etc/sssh.conf
 cp -r builds/ubuntu/DEBIAN ${FOLDER}/DEBIAN
 
 chmod -R 0775 ${FOLDER}/DEBIAN
+chmod 0755 ${FOLDER}/etc
 
 CWD=`pwd`
 
