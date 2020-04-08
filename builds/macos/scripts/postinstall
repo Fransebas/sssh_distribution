@@ -10,5 +10,9 @@ if [ ! -f ${KEYFILE} ]; then
     /usr/local/bin/sssh_server -mode=keygen -filename=${KEYFILE} >> /tmp/com.ssshserver.app.out
 fi
 
+
+# for some weird reason that I cant explain, I need to run this two times
+sudo launchctl load /Library/LaunchDaemons/com.ssshserver.app.plist
+sudo launchctl unload /Library/LaunchDaemons/com.ssshserver.app.plist
 sudo launchctl load /Library/LaunchDaemons/com.ssshserver.app.plist
 exit 0
