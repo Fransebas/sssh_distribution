@@ -11,7 +11,7 @@ export OUTPUT=${2}
 export FOLDER=temp
 
 mkdir -p ${FOLDER}/usr/local/bin
-mkdir -p ${FOLDER}/etc/init.d
+#mkdir -p ${FOLDER}/etc/init.d
 mkdir -p ${FOLDER}/lib/systemd/system
 mkdir -p ${FOLDER}/etc
 
