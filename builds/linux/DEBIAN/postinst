@@ -1,0 +1,16 @@
+#!/bin/sh
+
+mkdir -p /etc/sssh
+
+sudo systemctl enable sssh_server
+
+KEYFILE=/etc/sssh/rsa_host
+
+if [ ! -f "$KEYFILE" ]; then
+    /usr/local/bin/sssh_server -mode=keygen -filename=${KEYFILE} >> /tmp/com.ssshserver.app.out
+fi
+
+chmod -R 600 /etc/sssh/rsa_host
+
+sudo systemctl start sssh_server
+
