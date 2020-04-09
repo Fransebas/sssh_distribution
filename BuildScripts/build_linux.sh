@@ -25,8 +25,11 @@ cp -r builds/ubuntu/DEBIAN ${FOLDER}/DEBIAN
 chmod -R 0775 ${FOLDER}/DEBIAN
 
 echo "Version: ${VERSION}" >> ${FOLDER}/DEBIAN/control
+echo "\n" >> ${FOLDER}/DEBIAN/control
 
 mkdir -p ${OUTPUT}
+
+CWD=`pwd`
 
 cd ${FOLDER}
 find . -type f ! -regex '.*.hg.*' ! -regex '.*?debian-binary.*' ! -regex '.*?DEBIAN.*' -printf '%P ' | xargs md5sum > ${FOLDER}/DEBIAN/md5sums
