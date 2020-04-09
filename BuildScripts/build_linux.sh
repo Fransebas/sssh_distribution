@@ -21,6 +21,8 @@ go build -o ${FOLDER}/usr/local/bin/sssh_server
 cp builds/ubuntu/sssh_server.service ${FOLDER}/lib/systemd/system/sssh_server.service
 cp builds/ubuntu/sssh.conf ${FOLDER}/etc/sssh.conf
 
+cp -r builds/ubuntu/DEBIAN ${FOLDER}/DEBIAN
+
 echo "Version: ${VERSION}" >> ${FOLDER}/DEBIAN/control
 
 mkdir -p ${OUTPUT}
