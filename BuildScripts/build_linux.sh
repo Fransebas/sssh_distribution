@@ -21,26 +21,7 @@ go build -o ${FOLDER}/usr/local/bin/sssh_server
 cp builds/ubuntu/sssh_server.service ${FOLDER}/lib/systemd/system/sssh_server.service
 cp builds/ubuntu/sssh.conf ${FOLDER}/etc/sssh.conf
 
-
-echo `Package: sssh-server
-Version: ${VERSION}
-Architecture: all
-Essential: no
-Section: misc
-Priority: optional
-Depends:
-Maintainer: Sebastian Franco
-Installed-Size: 13000
-Description: Server for sssh
-` >> ${FOLDER}/DEBIAN/conffiles
-
-cp -r builds/ubuntu/DEBIAN ${FOLDER}/DEBIAN
-
-chmod -R 0775 ${FOLDER}/DEBIAN
-chmod 0755 ${FOLDER}/etc
-
-CWD=`pwd`
-
+echo "Version: ${VERSION}" >> ${FOLDER}/DEBIAN/conffiles
 
 mkdir -p ${OUTPUT}
 
