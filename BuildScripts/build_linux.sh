@@ -25,7 +25,7 @@ cp -r builds/ubuntu/DEBIAN ${FOLDER}/DEBIAN
 chmod -R 0775 ${FOLDER}/DEBIAN
 
 echo "Version: ${VERSION}" >> ${FOLDER}/DEBIAN/control
-echo \n >> ${FOLDER}/DEBIAN/control
+echo -e "\n" >> ${FOLDER}/DEBIAN/control
 
 cat ${FOLDER}/DEBIAN/control
 
