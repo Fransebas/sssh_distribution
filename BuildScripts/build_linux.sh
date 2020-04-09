@@ -22,6 +22,7 @@ cp builds/ubuntu/sssh_server.service ${FOLDER}/lib/systemd/system/sssh_server.se
 cp builds/ubuntu/sssh.conf ${FOLDER}/etc/sssh.conf
 
 cp -r builds/ubuntu/DEBIAN ${FOLDER}/DEBIAN
+chmod -R 0775 ${FOLDER}/DEBIAN
 
 echo "Version: ${VERSION}" >> ${FOLDER}/DEBIAN/control
 
