@@ -1,5 +1,4 @@
 Package: sssh-server
-Version: 0.0.16
 Architecture: all
 Essential: no
 Section: misc
