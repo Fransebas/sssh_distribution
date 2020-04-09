@@ -27,6 +27,8 @@ chmod -R 0775 ${FOLDER}/DEBIAN
 echo "Version: ${VERSION}" >> ${FOLDER}/DEBIAN/control
 echo "\n" >> ${FOLDER}/DEBIAN/control
 
+cat ${FOLDER}/DEBIAN/control
+
 mkdir -p ${OUTPUT}
 
 CWD=`pwd`
