@@ -34,7 +34,7 @@ mkdir -p ${OUTPUT}
 CWD=`pwd`
 
 cd ${FOLDER}
-find . -type f ! -regex '.*.hg.*' ! -regex '.*?debian-binary.*' ! -regex '.*?DEBIAN.*' -printf '%P ' | xargs md5sum >> ${FOLDER}/DEBIAN/md5sums
+find . -type f ! -regex '.*.hg.*' ! -regex '.*?debian-binary.*' ! -regex '.*?DEBIAN.*' -printf '%P ' | xargs md5sum >> DEBIAN/md5sums
 
 cd ${CWD}
 
