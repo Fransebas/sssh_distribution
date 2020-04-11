@@ -133,16 +133,12 @@ func main() {
 	}
 
 	if config.Mode == "server" {
-		CustomUtils.Logger.Println(Logging.INFO, "1")
 		server(config)
 	} else if config.Mode == "prompt" {
-		CustomUtils.Logger.Println(Logging.INFO, "2")
 		Programs.Prompt(config)
 	} else if config.Mode == "keygen" {
-		CustomUtils.Logger.Println(Logging.INFO, "3")
 		Programs.Keygen(config)
 	} else if config.Mode == "fingerprint" {
-		CustomUtils.Logger.Println(Logging.INFO, "4")
 		Programs.Fingerprint(config)
 	} else if config.Mode == "stop" {
 		Programs.Stop(config)

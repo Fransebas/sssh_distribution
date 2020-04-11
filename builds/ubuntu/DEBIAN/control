@@ -3,7 +3,7 @@ Architecture: all
 Essential: no
 Section: misc
 Priority: optional
-Depends:
+Depends: zsh
 Maintainer: Sebastian Franco
 Installed-Size: 13000
 Description: Server for sssh

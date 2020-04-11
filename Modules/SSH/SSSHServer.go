@@ -3,6 +3,7 @@ package SSH
 import (
 	"bufio"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
@@ -13,6 +14,7 @@ import (
 	"os"
 	"sssh_server/CustomUtils"
 	"sssh_server/Modules/Authentication"
+	"sssh_server/Modules/Logging"
 	"sssh_server/Modules/SSH/SFTP"
 	"strings"
 )
@@ -51,6 +53,7 @@ func (server *SSSHServer) OnNewSession(f func(session *SSHSession)) {
 	server.NewSessionHandler = f
 }
 
+// TODO: Change this!!!!!!!!
 const AUTHORIZED_KEYS_FILE = "/Users/fransebas/.ssh/authorized_keys"
 
 func (server *SSSHServer) ReadAuthorizedKeys(path string) {
@@ -213,8 +216,12 @@ func (server *SSSHServer) serve() {
 }
 
 func (server *SSSHServer) AcceptRequests(in <-chan *ssh.Request, channel *ssh.Channel, session *SSHSession) {
+
 	for req := range in {
+		CustomUtils.Logger.Println(Logging.INFO, req.Type)
 		switch req.Type {
+		//case "session":
+		//	session.
 		case "subsystem":
 			// handle ftp here
 			if string(req.Payload[4:]) == "sftp" {
@@ -222,14 +229,15 @@ func (server *SSSHServer) AcceptRequests(in <-chan *ssh.Request, channel *ssh.Ch
 				_ = req.Reply(true, nil)
 				go server.startSFTP(channel, session)
 			}
-		default:
+		case "exec":
 			// our custom protocol here
 			if req.WantReply {
 				_ = req.Reply(true, nil)
 				msgType := string(req.Payload[4:])
 				go func() { server.handleChannel(channel, session, msgType) }()
 			}
-
+		default:
+			CustomUtils.CheckPrint(errors.New("ssh request type " + req.Type + "is not supported"))
 		}
 	}
 }
