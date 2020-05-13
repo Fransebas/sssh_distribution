@@ -12,12 +12,13 @@ export FOLDER=temp
 
 mkdir -p ${FOLDER}/usr/local/bin
 mkdir -p ${FOLDER}/Library/LaunchDaemons
-mkdir -p ${FOLDER}/etc
+mkdir -p ${FOLDER}/etc/sssh_zsh/
 
 go build -o ${FOLDER}/usr/local/bin/sssh_server
 cp builds/macos/sssh_server.script.sh ${FOLDER}/usr/local/bin/sssh_server.script.sh
 cp builds/macos/com.ssshserver.app.plist ${FOLDER}/Library/LaunchDaemons/com.ssshserver.app.plist
 cp builds/macos/sssh.conf ${FOLDER}/etc/sssh.conf
+cp -R ohmyzsh/ ${FOLDER}/etc/sssh_zsh/
 
 chmod -R 755 ${FOLDER}
 

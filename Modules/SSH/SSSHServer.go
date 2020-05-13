@@ -12,11 +12,15 @@ import (
 	"log"
 	"net"
 	"os"
+	"path"
+	"sssh_server/Modules/DirectoryManager"
+	"strings"
+
 	"sssh_server/CustomUtils"
 	"sssh_server/Modules/Authentication"
 	"sssh_server/Modules/Logging"
+
 	"sssh_server/Modules/SSH/SFTP"
-	"strings"
 )
 
 type Handler func(s *SSHSession, w io.Writer, r io.Reader)
@@ -27,7 +31,6 @@ type SSSHServer struct {
 	handlers          map[string]Handler
 	AnyHandler        AnyHandler
 	NewSessionHandler func(session *SSHSession)
-	authorizedKeysMap map[string]bool
 	KeyPath           string // Path for the host key i.e. /etc/ssh/id_rsa or a custom path
 	hasBeenInit       bool
 	port              int
@@ -54,14 +57,17 @@ func (server *SSSHServer) OnNewSession(f func(session *SSHSession)) {
 }
 
 // TODO: Change this!!!!!!!!
-const AUTHORIZED_KEYS_FILE = "/Users/fransebas/.ssh/authorized_keys"
+//const AUTHORIZED_KEYS_FILE = "/Users/fransebas/.ssh/authorized_keys"
 
-func (server *SSSHServer) ReadAuthorizedKeys(path string) {
-	server.authorizedKeysMap = map[string]bool{}
-	file, err := os.Open(path)
+func (server *SSSHServer) ReadAuthorizedKeys(username string) map[string]bool {
+	dm := DirectoryManager.New(username)
+	cpath := path.Join(dm.UserDirectory, ".ssh/authorized_keys")
+	authorizedKeysMap := map[string]bool{}
+	file, err := os.Open(cpath)
 	if err != nil {
 		// If no file no problem just no keys
-		return
+		CustomUtils.CheckPrint(err)
+		return map[string]bool{}
 	}
 	defer file.Close()
 
@@ -71,10 +77,12 @@ func (server *SSSHServer) ReadAuthorizedKeys(path string) {
 		if !strings.Contains(line, "#") {
 			pubKey, _, _, _, err := ssh.ParseAuthorizedKey([]byte(line))
 			CustomUtils.CheckPrint(err)
-			server.authorizedKeysMap[string(pubKey.Marshal())] = true
+			if err == nil && pubKey != nil {
+				authorizedKeysMap[string(pubKey.Marshal())] = true
+			}
 		}
 	}
-
+	return authorizedKeysMap
 }
 
 func (server *SSSHServer) AddHostKeys(KeyPath string) {
@@ -121,7 +129,9 @@ func (server *SSSHServer) initAuthCallbacks() {
 				return nil, fmt.Errorf("invalid user %v", c.User())
 			}
 
-			if val, ok := server.authorizedKeysMap[string(pubKey.Marshal())]; val && ok {
+			authorizedKeysMap := server.ReadAuthorizedKeys(c.User())
+
+			if val, ok := authorizedKeysMap[string(pubKey.Marshal())]; val && ok {
 				return &ssh.Permissions{
 					// Record the public key used for authentication.
 					Extensions: map[string]string{
@@ -138,7 +148,7 @@ func (server *SSSHServer) initAuthCallbacks() {
 func (server *SSSHServer) InitServer(KeyPath string, port int) {
 	server.port = port
 	server.hasBeenInit = true
-	server.ReadAuthorizedKeys(AUTHORIZED_KEYS_FILE)
+
 	if server.handlers == nil {
 		server.handlers = make(map[string]Handler)
 	}
@@ -203,13 +213,20 @@ func (server *SSSHServer) serve() {
 
 				// Accept all channels, we don't care about their type,
 				// Could be bananas for all I know
-				channel, requests, err := newChannel.Accept()
-				if err != nil {
-					log.Fatalf("Could not accept channel: %v", err)
-				}
+				go func() {
+					defer func() {
+						if err := recover(); err != nil {
+							CustomUtils.CheckPrint(err.(error))
+						}
+					}()
 
-				go server.AcceptRequests(requests, &channel, &session)
+					channel, requests, err := newChannel.Accept()
+					if err != nil {
+						log.Fatalf("Could not accept channel: %v", err)
+					}
 
+					server.AcceptRequests(requests, &channel, &session)
+				}()
 			}
 		}()
 	}

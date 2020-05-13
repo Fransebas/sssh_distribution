@@ -61,17 +61,23 @@ func (ts *TerminalService) GetHandlers() []*API.RequestHandler {
 
 	terminalResize := API.RequestHandler{
 		RequestHandler: func(w io.Writer, r io.Reader) {
+			// TODO: correctly close the channel
 			// On terminal connection opened
+			for {
+				var resize pty.Winsize
+				b, err := CustomUtils.Read(r)
+				err = json.Unmarshal(b, &resize)
 
-			var resize pty.Winsize
-			b, err := CustomUtils.Read(r)
-			err = json.Unmarshal(b, &resize)
+				if err != nil {
+					CustomUtils.CheckPrint(err)
+					break
+				}
 
-			CustomUtils.CheckPrint(err)
-
-			if err == nil {
-				ts.Terminal.SetSize(&resize)
+				if err == nil {
+					ts.Terminal.SetSize(&resize)
+				}
 			}
+
 		},
 		Name: "terminal.resize",
 	}

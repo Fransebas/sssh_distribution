@@ -61,7 +61,8 @@ func (s *TerminalSession) InitConfig() {
 
 	dm := DirectoryManager.New(s.Username)
 
-	s.Config.HistoryFilePath = dm.GetVariableFile(HISTORY_FILE_NAME + s.ID)
+	//s.Config.HistoryFilePath = dm.GetVariableFile(HISTORY_FILE_NAME + s.ID)
+	s.Config.HistoryFilePath = dm.GetVariableFile(HISTORY_FILE_NAME + "1")
 	s.Config.BashrcFilePath = dm.GetConfigFile("bashrc")
 }
 

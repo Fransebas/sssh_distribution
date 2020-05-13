@@ -2,9 +2,7 @@ package History
 
 import (
 	"bufio"
-	"io/ioutil"
 	"os"
-	"sssh_server/CustomUtils"
 	"sssh_server/Modules/SSH"
 	"sssh_server/SessionModules/API"
 	"strconv"
@@ -62,12 +60,9 @@ func processFiles(s string) string {
 }
 
 func (h *History) readCommandsInFile(filepath string) {
-	f, err := os.Create(filepath)
-	CustomUtils.CheckPanic(err, "Could not read history file with path "+filepath)
-	data, err := ioutil.ReadAll(f)
-	CustomUtils.CheckPanic(err, "Could not read history file with path "+filepath)
-	_ = f.Close()
-	h.updateRecentCommands(processFiles(string(data)))
+	//data, err := ioutil.ReadFile(filepath)
+	//CustomUtils.CheckPanic(err, "Could not read history file with path "+filepath)
+	//h.updateRecentCommands(processFiles(string(data)))
 }
 
 func commandFromParts(s []string) Command {

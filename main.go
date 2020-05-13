@@ -124,15 +124,16 @@ func main() {
 	config = Configuration.Configuration{}
 	config.Init()
 
-	CustomUtils.Logger.Println(Logging.INFO, fmt.Sprint(os.Args))
-	CustomUtils.Logger.Println(Logging.INFO, config.String())
-
 	rpc = RPC.New(config.RPCPort)
 	for _, service := range SessionLayer.CommandServices {
 		rpc.AddService(service)
 	}
 
 	if config.Mode == "server" {
+
+		CustomUtils.Logger.Println(Logging.INFO, fmt.Sprint(os.Args))
+		CustomUtils.Logger.Println(Logging.INFO, config.String())
+
 		server(config)
 	} else if config.Mode == "prompt" {
 		Programs.Prompt(config)

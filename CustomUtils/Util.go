@@ -37,11 +37,35 @@ func Read(r io.Reader) ([]byte, error) {
 	return b[:l], e
 }
 
-func ExecuteCommand(cmmnd string) string {
-	c := exec.Command("bash", "-c", cmmnd)
+// Run a command and get the reference to the command
+// You need to specify the user to prevent code injection
+func ExecuteCommand(cmmnd string, user string) *exec.Cmd {
+	// prevent commenting the command
+	//command := fmt.Sprintf(`bash -c %v`, cmmnd)
+
+	c := exec.Command("sudo", "-H", "-u", user, "bash", "-c", cmmnd)
+
+	return c
+
+}
+
+// Run a command and get the output
+func ExecuteCommandOnce(cmmnd string, user string) string {
+	// prevent commenting the command
+	c := ExecuteCommand(cmmnd, user)
+
 	b, e := c.Output()
 	CheckPrint(e)
 
+	return string(b)
+}
+
+// Run a command and get the output this command is going to run as the running user of the server it should be sudo
+func SudoExecuteCommandOnce(cmmnd string) string {
+	// prevent commenting the command
+	c := exec.Command("bash", "-c", cmmnd)
+	b, e := c.Output()
+	CheckPrint(e)
 	return string(b)
 }
 

@@ -8,6 +8,7 @@ import (
 )
 
 type ProcessStatusModule struct {
+	user string
 }
 
 type ProcessStatusModel struct {
@@ -25,7 +26,7 @@ type ProcessStatusModel struct {
 }
 
 func (ps *ProcessStatusModule) OnNewSession(session API.TerminalSessionInterface) {
-
+	ps.user = session.GetUsername()
 }
 func (ps *ProcessStatusModule) OnNewConnection(sshSession *SSH.SSHSession) {}
 
@@ -44,7 +45,7 @@ func Fields(line string, headers []string) []string {
 }
 
 func (ps *ProcessStatusModule) getProcessStatus() *[]map[string]string {
-	res := CustomUtils.ExecuteCommand("ps aux")
+	res := CustomUtils.ExecuteCommandOnce("ps aux", ps.user)
 	lines := strings.Split(res, "\n")
 	headers := strings.Fields(lines[0])
 

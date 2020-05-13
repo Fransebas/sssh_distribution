@@ -20,7 +20,7 @@ type BashVar struct {
 
 func (g *GlobalVariables) getVariables() string {
 	//executer := CommandExecuter.CommandExecuter{}
-	//res := executer.ExecuteCommand("env")
+	//res := executer.ExecuteCommandOnce("env")
 	lines := strings.Split(g.vars, "\n")
 	variables := []BashVar{}
 	for _, line := range lines {
@@ -43,7 +43,7 @@ func (g *GlobalVariables) getVariables() string {
 func (*GlobalVariables) storeVariable(bashVar BashVar) error {
 	//executer := CommandExecuter.CommandExecuter{}
 	// TODO : create function
-	//executer.ExecuteCommand(fmt.Sprintf( "export %v=%v", bashVar.Name, bashVar.Value))
+	//executer.ExecuteCommandOnce(fmt.Sprintf( "export %v=%v", bashVar.Name, bashVar.Value))
 
 	return os.Setenv(bashVar.Name, bashVar.Value)
 }

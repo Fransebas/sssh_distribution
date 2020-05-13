@@ -1,50 +1,83 @@
 package Terminal
 
 var Bashrc = `#!/usr/bin/env bash
-
 # SSSH defined variables
 # $SSSH The path for the sssh_server executable
 # $SSSH_USER user id string
 # $HIST_FILE_NAME session history file
 
-createIfNotExist(){
+export TERM="xterm"
+
+# The terminal doesn't start on the user directory so we use cd'
+cd
+
+createIfNotExist() {
     if [ ! -e "$1" ] ; then
         touch "$1"
     fi
 }
-
-
-#history -anrw $HIST_FILE_NAME
 
 [[ -r ~/.bash_profile ]] && . ~/.bash_profile
 [[ -r ~/.bashrc ]] && . ~/.bashrc
 [[ -r ~/.profile ]] && . ~/.profile
 
 
-# Colors in the terminal
+############ OH MY ZSH
 
-export PS1="\[\033[36m\]\u\[\033[m\]@\[\033[32m\]\h:\[\033[33;1m\]\w\[\033[m\]\$ "
-export CLICOLOR=1
-export LSCOLORS=ExFxBxDxCxegedabagacad
-alias ls='ls -GFh'
-export TERM=xterm-color
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#ff00ff,bg=cyan,bold,underline"
 
-# End Colors
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=240"
 
-# Set up of history File
+export ZSH=/etc/sssh_zsh
+ZSH_THEME="custom"
+
+plugins=(zsh-autosuggestions colorize colored-man-pages cp)
+
+source $ZSH/oh-my-zsh.sh
+
+# ! ########### END OH MY ZSH
+
+############ Set up of history File
+
+HISTSIZE=1000
+SAVEHIST=1000
+
 createIfNotExist $HIST_FILE_NAME
 
 export HISTFILE=$HIST_FILE_NAME
-export HISTCONTROL=ignorespace ; history -d 1
 
-# End Set up of history File
+# ! ########### End Set up of history File
+
+############ Hooks
+
+chpwdcmd() { 
+	setopt LOCAL_OPTIONS NO_NOTIFY NO_MONITOR
+	$SSSH -mode=prompt -userid=$SSSH_USER -pwd="$(pwd)" &> /dev/null & disown
+	setopt LOCAL_OPTIONS NOTIFY MONITOR
+}
+
+prmptcmd() {
+	setopt LOCAL_OPTIONS NO_NOTIFY NO_MONITOR
+	$SSSH -mode=prompt -userid=$SSSH_USER -history="$(history 1)" -pwd="$(pwd)" &> /dev/null & disown
+	setopt LOCAL_OPTIONS NOTIFY MONITOR
+}
+precmd_functions=(prmptcmd)
+
+# ! ########### End of Hooks
 
 
-# This is for production
-$SSSH -mode=prompt -userid=$SSSH_USER -history="$(history)" -pwd="$HOME"
-#curl --data "$(history)" http://localhost:2000/newcommand?SSSH_USER=$SSSH_USER &> /dev/null
+history &> /dev/null
 
-export PROMPT_COMMAND='$SSSH -mode=prompt -userid=$SSSH_USER -history="$(history 1)" -pwd="$(pwd)" &> /dev/null & disown'
+if [ $? -eq 0 ] ; then
+	setopt LOCAL_OPTIONS NO_NOTIFY NO_MONITOR
+	$SSSH -mode=prompt -userid=$SSSH_USER -history="$(history)" &> /dev/null & disown
+	setopt LOCAL_OPTIONS NOTIFY MONITOR
+fi
 
- cd
+
+
+## THEME
+
+
+
 `

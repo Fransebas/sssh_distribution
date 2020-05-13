@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 	"os/user"
+	"path"
 	"runtime"
 	"sssh_server/CustomUtils"
-	"sssh_server/Modules/Logging"
 )
 
 type DirectoryManager struct {
@@ -16,8 +16,8 @@ type DirectoryManager struct {
 }
 
 func getConfigFolder(homeArg, pathArg, username string) string {
-	home := removeEndSlash(homeArg)
-	path := removeStartSlash(pathArg)
+	home := path.Clean(homeArg)
+	basePath := path.Clean(pathArg)
 	dir := ""
 	if runtime.GOOS == "windows" {
 		// running no Windows
@@ -26,27 +26,25 @@ func getConfigFolder(homeArg, pathArg, username string) string {
 
 	if runtime.GOOS == "darwin" {
 		// running no MacOS
-		dir = fmt.Sprintf("%v/Library/Application Support/sssh_server", home)
+		dir = path.Join(home, "/Library/Application Support/sssh_server")
 	} else {
 		// linux and something else
 		// TODO: validate other OS's
-		dir = fmt.Sprintf("%v/.sssh_server", home)
+		dir = path.Join(home, "/.sssh_server")
 	}
-
-	CustomUtils.Logger.Println(Logging.INFO, fmt.Sprintf("%v/%v", dir, path))
 
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		// Create directory if not exist
 		// It is created like this to avoid permissions errors
-		CustomUtils.ExecuteCommand(fmt.Sprintf(`sudo -u %v mkdir "%v"`, username, dir))
+		CustomUtils.ExecuteCommandOnce(fmt.Sprintf(`mkdir "%v"`, dir), username)
 	}
 
-	return removeEndSlash(fmt.Sprintf("%v/%v", dir, path))
+	return path.Clean(path.Join(dir, basePath))
 }
 
 func getVariableFolder(homeArg, pathArg, username string) string {
-	home := removeEndSlash(homeArg)
-	path := removeStartSlash(pathArg)
+	home := path.Clean(homeArg)
+	basePath := path.Clean(pathArg)
 	dir := ""
 	if runtime.GOOS == "windows" {
 		// running no Windows
@@ -55,41 +53,20 @@ func getVariableFolder(homeArg, pathArg, username string) string {
 
 	if runtime.GOOS == "darwin" {
 		// running no MacOS
-		dir = fmt.Sprintf("%v/Library/Application Support/sssh_server/var", home)
+		dir = path.Join(home, "/Library/Application Support/sssh_server/var")
 	} else {
 		// linux and something else
 		// TODO: validate other OS's
-		dir = fmt.Sprintf("%v/.sssh_server", home)
+		dir = path.Join(home, "/.sssh_server")
 	}
 
-	CustomUtils.Logger.Println(Logging.INFO, fmt.Sprintf("%v/%v", dir, path))
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		// Create directory if not exist
 		// It is created like this to avoid permissions errors
-		CustomUtils.ExecuteCommand(fmt.Sprintf(`sudo -u %v mkdir "%v"`, username, dir))
+		CustomUtils.ExecuteCommandOnce(fmt.Sprintf(`mkdir "%v"`, dir), username)
 	}
 
-	return removeEndSlash(fmt.Sprintf("%v/%v", dir, path))
-}
-
-func removeEndSlash(path string) string {
-	if len(path) <= 0 {
-		return path
-	}
-	if path[len(path)-1] == '/' {
-		return path[:len(path)-1]
-	}
-	return path
-}
-
-func removeStartSlash(path string) string {
-	if len(path) <= 0 {
-		return path
-	}
-	if path[0] == '/' {
-		return path[1:]
-	}
-	return path
+	return path.Clean(path.Join(dir, basePath))
 }
 
 func New(username string) *DirectoryManager {
@@ -104,9 +81,9 @@ func New(username string) *DirectoryManager {
 }
 
 func (d *DirectoryManager) GetConfigFile(fileName string) string {
-	return removeEndSlash(fmt.Sprintf("%v/%v", removeEndSlash(d.ConfigFolder), removeStartSlash(fileName)))
+	return path.Join(d.ConfigFolder, fileName)
 }
 
 func (d *DirectoryManager) GetVariableFile(fileName string) string {
-	return removeEndSlash(fmt.Sprintf("%v/%v", removeEndSlash(d.VariableFolder), removeStartSlash(fileName)))
+	return path.Join(d.VariableFolder, fileName)
 }

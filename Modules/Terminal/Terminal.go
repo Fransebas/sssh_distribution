@@ -6,6 +6,8 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"path"
+
 	//"log"
 	"os"
 	"os/exec"
@@ -65,7 +67,8 @@ func InitTerminal(id, historyPath, bashrc, username string) *Terminal {
 
 // Write data into the terminal/bash
 func (t *Terminal) Write(b []byte) (int, error) {
-	//fmt.Println("command received")
+	//s := string(b)
+	//fmt.Println("command received" + s)
 	//CustomUtils.LogTime(string(b), "received")
 	return t.writer.Write(b)
 }
@@ -153,14 +156,14 @@ func createFiles(bashrc, username string) {
 		// path/to/whatever exists
 
 		// TODO: this updates the file, maybe there is a better way
-		//CustomUtils.ExecuteCommand(fmt.Sprintf(`sudo -u %v touch "%v"`, username, bashrcPath))
+		//CustomUtils.ExecuteCommandOnce(fmt.Sprintf(`sudo -u %v touch "%v"`, username, bashrcPath))
 		err = ioutil.WriteFile(bashrcPath, []byte(Bashrc), 0755)
 		CustomUtils.CheckPrint(err)
 	} else if os.IsNotExist(err) {
 		// path/to/whatever does *not* exist
 
 		// This will create the file for the user with the right permissions
-		//CustomUtils.ExecuteCommand(fmt.Sprintf(`sudo -u %v touch "%v"`, username, bashrcPath))
+		//CustomUtils.ExecuteCommandOnce(fmt.Sprintf(`sudo -u %v touch "%v"`, username, bashrcPath))
 		err = ioutil.WriteFile(bashrcPath, []byte(Bashrc), 0755)
 		CustomUtils.CheckPrint(err)
 
@@ -173,18 +176,22 @@ func createFiles(bashrc, username string) {
 
 // Creates and interactive bash session based on the ID and the file to use as history file, here we add the file to run for the initialization,
 // i.e. we change the bashrc for our own version that by itself call the user bashrc
-// the init file can be found in `/sssh_server/Assets/bashrc` *this should change to a local directory*
+// the init file can be found in `Bashrc.go`
 func initInteractive(ID, historyPath, bashrc, username string) (*os.File, io.Reader, io.Writer) {
 	// Handle pty size.
 
 	createFiles(bashrc, username)
 
+	createFiles(path.Join(path.Dir(bashrc), ".zshrc"), username)
+
 	// Send the initialization file the variables it's going to use
-	initCommand := `export SSSH=%v; export SSSH_USER=%v; export HIST_FILE_NAME='%v'; bash --rcfile '%s' -i`
+	// --rcfile '%s' -i
+	initCommand := `export SSSH=%v; export SSSH_USER=%v; export HIST_FILE_NAME='%v'; export ZDOTDIR='%v' ; zsh`
 	userBash := fmt.Sprintf(`sudo -H -u %v bash -c "%v"`, username, initCommand)
 	//-c "login -p -f fransebas"
 	ssshPath, _ := os.Executable()
-	bash := fmt.Sprintf(userBash, ssshPath, ID, historyPath, bashrc)
+	//bashrc
+	bash := fmt.Sprintf(userBash, ssshPath, ID, historyPath, path.Dir(bashrc))
 	//bash := fmt.Sprintf(`export SSSH=%v; export SSSH_USER=%v; export HIST_FILE_NAME=%v; bash --rcfile %s -c "login fransebas"`, "~/go/src/sssh_server/sssh_server", ID, historyPath, path)
 
 	c := exec.Command("bash", "-c", bash)
@@ -193,12 +200,4 @@ func initInteractive(ID, historyPath, bashrc, username string) (*os.File, io.Rea
 	CustomUtils.CheckPrint(err)
 
 	return ptmx, ptmx, ptmx
-}
-
-var ignoreInternalCmds = " export HISTCONTROL=ignorespace ; history -d $(history 1) \n\n"
-var readCmdHistory = func(cmd string) string { return fmt.Sprintf(" export PROMPT_COMMAND='%s' \n\n", cmd) }
-var runOnCommand = func(cmd string) string { return fmt.Sprintf(" export PROMPT_COMMAND='%s' \n\n", cmd) }
-var getLastCommand = func(cmd string) string { return fmt.Sprintf(" history 1 | %s", cmd) }
-var makeRqst = func(n string) string {
-	return fmt.Sprintf("curl -d \"$(history %s)\" http://localhost:2000/newcommand", n)
 }

@@ -32,7 +32,7 @@ import (
 
 // Returns true if the given username exist in the system, it simply uses id -u 'username'
 func UserExist(username string) bool {
-	res := CustomUtils.ExecuteCommand(fmt.Sprintf("id -u %v", username))
+	res := CustomUtils.SudoExecuteCommandOnce(fmt.Sprintf("id -u %v", username))
 	if len(res) <= 0 {
 		return false
 	}

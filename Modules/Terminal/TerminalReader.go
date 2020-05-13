@@ -28,6 +28,8 @@ func (tr *TerminalReader) Read(p []byte) (n int, err error) {
 	tr.terminal.read(tr.terminalBuffer)
 
 	n, err = tr.BufferRead(p)
+	//s := string(p[:n])
+	//fmt.Println(s)
 	//CustomUtils.LogTime(string(p[:n]), "buffer read / send")
 	return
 }

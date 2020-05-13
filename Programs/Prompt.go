@@ -18,7 +18,7 @@ func Prompt(config Configuration.Configuration) {
 
 // I don't like this solution but time will tell
 func updateVariables(config Configuration.PromptConfig) {
-	data := CustomUtils.ExecuteCommand("env")
+	data := CustomUtils.SudoExecuteCommandOnce("env")
 	_, e := http.Post(fmt.Sprintf("http://localhost:2000/variables?SSSH_USER=%v", config.UserId), "text/html", strings.NewReader(data))
 	CustomUtils.CheckPrint(e)
 }

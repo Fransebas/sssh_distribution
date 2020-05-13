@@ -131,7 +131,7 @@ func MakeMnemonic(pubKey []byte) (string, error) {
 }
 
 func GetKeyHash(pubKey []byte) ([]byte, error) {
-	var res = CustomUtils.ExecuteCommand(fmt.Sprintf(`ssh-keygen -q -l -F localhost -f /dev/stdin <<<"localhost %v"`, string(pubKey)))
+	var res = CustomUtils.SudoExecuteCommandOnce(fmt.Sprintf(`ssh-keygen -q -l -F localhost -f /dev/stdin <<<"localhost %v"`, string(pubKey)))
 	hash := strings.Split(strings.Split(res, " ")[2], ":")[1]
 	return base64.RawStdEncoding.DecodeString(hash)
 }

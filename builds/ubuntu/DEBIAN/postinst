@@ -1,5 +1,9 @@
 #!/bin/sh
 
+command_exists() {
+	command -v "$@" >/dev/null 2>&1
+}
+
 mkdir /etc/sssh
 
 sudo systemctl enable sssh_server
