@@ -187,7 +187,7 @@ func (s *SFTPRequestServer) Filelist(r *sftp.Request) (sftp.ListerAt, error) {
 }
 
 func (s *SFTPRequestServer) testPermission(path, mode string) bool {
-	cmmnd := fmt.Sprintf(`sudo -u %v test -%v %v; echo "$?"`, s.user, mode, path)
+	cmmnd := fmt.Sprintf(`sudo -u %v test -%v "%v"; echo "$?"`, s.user, mode, path)
 	c := exec.Command("bash", "-c", cmmnd)
 	b, e := c.Output()
 
